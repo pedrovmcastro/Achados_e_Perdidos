@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Achados e Perdidos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+    .login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      max-width: 400px;
+      width: 100%;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <header class="py-3 mb-4 border-bottom">
+        <h1 class="fs-4">Achados e Perdidos</h1>
+      </header>
+      <div class="login">
+        <div class="card shadow p-4 login-card">
+          <h3 class="text-center mb-4">Login</h3>
+
+          <form>
+            <div class="mb-3">
+              <label for="usuario" class="form-label">Usuário</label>
+              <input type="text" class="form-control" id="usuario" placeholder="Digite seu usuário">
+            </div>
+
+            <div class="mb-3">
+              <label for="senha" class="form-label">Senha</label>
+              <input type="password" class="form-control" id="senha" placeholder="Digite sua senha">
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Entrar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
