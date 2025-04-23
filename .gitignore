@@ -16,5 +16,9 @@ venv/
 # Python logs
 *.log
 
+# Secret File
+secret.py
+
+=======
 # Pytest cache
 .pytest_cache/
