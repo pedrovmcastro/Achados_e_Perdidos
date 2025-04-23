@@ -13,7 +13,7 @@
     <div class="p-4">
       <h2 class="mb-4">Menu</h2>
       <ul>
-        <li><a href="#">Gerenciar Funcionários</a></li>
+        <li><a href="/admin/funcionario">Gerenciar Funcionários</a></li>
         <li><a href="#">Gerenciar Categorias</a></li>
         <li><a href="#">Gerenciar Objetos</a></li>
       </ul>
@@ -23,7 +23,7 @@
         <form>
           <div class="mb-3">
             <label for="nome" class="form-label">Nome</label>
-            <input type="text" class="form-control" id="nome" placeholder="Nome completo">
+            <input type="text" class="form-control" id="nome" value="{{ funcionario.nome }}">
           </div>
 
           <div class="mb-3">
