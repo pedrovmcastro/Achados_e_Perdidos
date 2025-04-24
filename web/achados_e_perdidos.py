@@ -1,5 +1,7 @@
 from flask import Flask, render_template
 
+from zoneinfo import ZoneInfo    # fuso horário
+
 from modules.funcionarios import funcionario
 
 app = Flask(__name__)
@@ -8,6 +10,16 @@ app.secret_key = '-\x06\xb3\xbd\x15/\xc3\xef~\xd8]\xb3\xef\xd8\xa3\xe5\xa5Sn\xf3
 #app.register_blueprint(categorias)
 #app.register_blueprint(objetos)
 app.register_blueprint(funcionario)
+
+# Filtros #
+@app.template_filter('format_datetime')
+def jinja_format_datetime(value):
+    if value is None:
+        return ""
+    # Converte para o fuso horário de São Paulo
+    local_tz = ZoneInfo("America/Sao_Paulo")
+    value_local = value.astimezone(local_tz)
+    return value_local.strftime("%d/%m/%Y %H:%M")
 
 # ----- #
 # Index #
@@ -18,6 +30,10 @@ def index():
 @app.route('/admin/')
 def admin():
     return render_template('admin.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
