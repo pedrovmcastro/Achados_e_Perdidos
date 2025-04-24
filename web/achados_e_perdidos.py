@@ -19,6 +19,10 @@ def index():
 def admin():
     return render_template('admin.html')
 
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
