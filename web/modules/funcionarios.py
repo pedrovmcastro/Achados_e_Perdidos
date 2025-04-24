@@ -1,11 +1,12 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from bson.objectid import ObjectId
+from bson.codec_options import CodecOptions
 import secret
-import time
 import pymongo
+from datetime import datetime, timezone
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
-db = client['achadoseperdidos']
+db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 funcionarios_collections = db['funcionarios']
 funcionario = Blueprint("funcionario", __name__)
 
@@ -18,6 +19,9 @@ def funcionario_index():
             "id": str(f['_id']),
             "nome": f['nome'],
             "matricula": f['matricula'],
+            "ligado": f['ligado'],
+            "ligado_em": f.get('ligado_em'),
+            "desligado_em": f.get('desligado_em'),
         })
 
     return render_template("funcionario.html",
@@ -43,7 +47,8 @@ def funcionario_add():
                 "rua": rua,
                 "cep": cep,
             },
-            "ligado": int(time.time()),
+            "ligado": True,
+            "ligado_em": datetime.now(timezone.utc),
         })
         flash("Cadastrado com sucesso!", "good")
     else:
@@ -90,7 +95,23 @@ def funcionario_edit_action(funcionario_id):
     return redirect(url_for(".funcionario_index"))
 
 
-@funcionario.route("/admin/funcionario/desligar/<string:funcionario_id>")
+@funcionario.route("/admin/funcionario/<string:funcionario_id>/desligar")
+def funcionario_desligar(funcionario_id):
+    funcionarios_collections.update_one(
+        {"_id": ObjectId(funcionario_id)},
+        {
+                "$set": {
+                    "ligado": False,
+                    "desligado_em": datetime.now(timezone.utc),
+                }
+            }
+        )
+    return redirect(url_for(".funcionario_index"))
+
+
+""" QUANDO QUISER TROCAR O DESLIGAR POR DELETAR
+@funcionario.route("/admin/funcionario/<string:funcionario_id>/desligar")
 def funcionario_desligar(funcionario_id):
     funcionarios_collections.delete_one({"_id": ObjectId(funcionario_id)})
     return redirect(url_for(".funcionario_index"))
+"""

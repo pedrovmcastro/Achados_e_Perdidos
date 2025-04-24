@@ -67,6 +67,9 @@
           <tr>
             <th>Nome</th>
             <th>Matricula</th>
+            <th>Ligado em</th>
+            <th>Ligado</th>
+            <th>Desligado em</th>
             <th></th>
           </tr>
         </thead>
@@ -75,6 +78,9 @@
           <tr>
             <td>{{ funcionario.nome }}</td>
             <td>{{ funcionario.matricula }}</td>
+            <td>{{ funcionario.ligado_em|format_datetime }}</td>
+            <td>{{ "SIM" if funcionario.ligado else "NÃO" }}</td>
+            <td>{{ funcionario.desligado_em|format_datetime }}</td>
             <td><a href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a></td>
           </tr>
           {% endfor %}
