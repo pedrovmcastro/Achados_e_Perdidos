@@ -41,7 +41,6 @@ def funcionario_add():
         funcionarios_collections.insert_one({
             "nome": nome,
             "matricula": matricula,
-            "senha": senha,
             "administrador": administrador is not None,
             "endereco": {
                 "rua": rua,
@@ -65,6 +64,8 @@ def funcionario_edit(funcionario_id):
 
 @funcionario.route("/admin/<string:funcionario_id>/edit", methods=["POST"])
 def funcionario_edit_action(funcionario_id):
+    
+    # Coletar dados do formulário
     nome = request.form.get("nome")
     matricula = request.form.get("matricula")
     senha = request.form.get("senha")
@@ -72,25 +73,41 @@ def funcionario_edit_action(funcionario_id):
     rua = request.form.get("rua")
     cep = request.form.get("cep")
 
-    if nome and matricula and senha and rua and cep:
-        funcionarios_collections.update_one(
+    # Validação server-side
+    if not all([nome, matricula, rua, cep]):
+        flash("Todos os campos obrigatórios devem ser preenchidos!", "bad")
+        return redirect(url_for(".funcionario_edit", funcionario_id=funcionario_id))
+
+     # Preparar dados para atualização
+    update_data = {
+        "nome": nome,
+        "matricula": matricula,
+        "administrador": administrador is not None,
+        "endereco": {
+            "rua": rua,
+            "cep": cep
+        }
+    }
+
+    # Atualizar senha apenas se for fornecida
+    if senha:
+        update_data["senha"] = senha
+
+    try:
+        # Atualização única no banco de dados
+        result = funcionarios_collections.update_one(
             {"_id": ObjectId(funcionario_id)},
-            {
-                "$set": {
-                    "nome": nome,
-                    "matricula": matricula,
-                    "senha": senha,
-                    "administrador": administrador is not None,
-                    "endereco": {
-                        "rua": rua,
-                        "cep": cep,
-                    },
-                }
-            }
+            {"$set": update_data}
         )
-        flash("Funcionário atualizado com sucesso!", "good")
-    else:
-        flash("Alguma coisa deu errado!", "bad")
+
+        if result.modified_count == 1:
+            flash("Funcionário atualizado com sucesso!", "good")
+        else:
+            flash("Nenhuma alteração foi detectada.", "warning")
+            
+    except Exception as e:
+        print(f"Erro na atualização: {e}")
+        flash("Erro crítico na atualização do funcionário!", "bad")
 
     return redirect(url_for(".funcionario_index"))
 
