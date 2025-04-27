@@ -20,8 +20,7 @@ def funcionario_index():
             "nome": f['nome'],
             "matricula": f['matricula'],
             "ligado": f['ligado'],
-            "ligado_em": f.get('ligado_em'),
-            "desligado_em": f.get('desligado_em'),
+            "desligado": f.get('desligado'),
         })
 
     return render_template("funcionario.html",
@@ -46,8 +45,7 @@ def funcionario_add():
                 "rua": rua,
                 "cep": cep,
             },
-            "ligado": True,
-            "ligado_em": datetime.now(timezone.utc),
+            "ligado": datetime.now(timezone.utc),
         })
         flash("Cadastrado com sucesso!", "good")
     else:
@@ -118,8 +116,7 @@ def funcionario_desligar(funcionario_id):
         {"_id": ObjectId(funcionario_id)},
         {
                 "$set": {
-                    "ligado": False,
-                    "desligado_em": datetime.now(timezone.utc),
+                    "desligado": datetime.now(timezone.utc),
                 }
             }
         )
