@@ -60,7 +60,7 @@ def funcionario_edit(funcionario_id):
                            funcionario=funcionarios_collections.find_one({"_id": ObjectId(funcionario_id)}))
 
 
-@funcionario.route("/admin/<string:funcionario_id>/edit", methods=["POST"])
+@funcionario.route("/admin/funcionario/edit/<string:funcionario_id>/form", methods=["POST"])
 def funcionario_edit_action(funcionario_id):
     
     # Coletar dados do formulário
