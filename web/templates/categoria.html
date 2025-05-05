@@ -38,10 +38,17 @@ window.addEventListener("load", () => {
   document.querySelector("#campo").addEventListener("keydown", (e) => {
     if (e.code === "Enter") {
       e.preventDefault();
-      if (e.target.value.length) {
+      tag = e.target.value
+      if (tag.length) {
         const pill = document.createElement("span");
         pill.classList.add("badge", "text-bg-secondary", "me-2");
-        pill.textContent = e.target.value;
+        pill.textContent = tag;
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "campos[]";
+        input.value = tag;
+        pill.appendChild(input)
 
         // Adicionando o evento de clique para remover a pílula
         pill.addEventListener("click", (e) => {
