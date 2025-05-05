@@ -25,6 +25,7 @@ def categoria_index():
 @categoria.route("/admin/categoria/add", methods=["POST"])
 def categoria_add():
     nome = request.form.get("nome")
+
     campos = request.form.getlist('campos[]')
 
     if nome and campos:
@@ -83,4 +84,3 @@ def categoria_edit_action(categoria_id):
 def funcionario_desligar(categoria_id):
     categoria_collections.delete_one({"_id": ObjectId(categoria_id)})
     return redirect(url_for(".categoria_index"))
-  
