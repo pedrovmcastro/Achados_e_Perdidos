@@ -35,9 +35,9 @@
         <!-- Menu Lateral -->
         <div class="col-md-3">
           <div class="list-group">
-            <a href="#" class="list-group-item list-group-item-action">Gerenciar Funcionários</a>
-            <a href="#" class="list-group-item list-group-item-action">Gerenciar Categorias</a>
-            <a href="#" class="list-group-item list-group-item-action">Gerenciar Objetos</a>
+            <a href="/admin/funcionario" class="list-group-item list-group-item-action">Gerenciar Funcionários</a>
+            <a href="/admin/categoria" class="list-group-item list-group-item-action">Gerenciar Categorias</a>
+            <a href="/admin/objeto" class="list-group-item list-group-item-action">Gerenciar Objetos</a>
           </div>
         </div>
 
@@ -45,57 +45,40 @@
         <div class="col-md-9">
           <h3 class="mb-3">Cadastrar Objeto</h3>
           <div class="card p-4 mb-5">
-            <form>
+            <form action="/admin/objeto/add" method="post">
               <h5 class="mb-3">Descrição</h5>
               <div class="mb-3">
                 <label for="descricao" class="form-label">Descrição do Objeto</label>
-                <textarea class="form-control" id="descricao" rows="3" placeholder="Ex: Celular preto encontrado próximo ao pátio..."></textarea>
+                <textarea class="form-control" id="descricao" name="descricao" rows="3" placeholder="Ex: Celular preto encontrado próximo ao pátio..."></textarea>
               </div>
 
               <div class="mb-3">
                 <label for="imagem" class="form-label">Upload de Imagem</label>
-                <input type="file" class="form-control" id="imagem" />
+                <input type="file" class="form-control" id="imagem" name="imagem" />
               </div>
 
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="dataEncontrado" class="form-label">Data Encontrado</label>
-                  <input type="date" class="form-control" id="dataEncontrado" />
+                  <label for="data_encontrado" class="form-label">Data Encontrado</label>
+                  <input type="date" class="form-control" id="data_encontrado" name="data_encontrado" />
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="localEncontrado" class="form-label">Local Encontrado</label>
-                  <input type="text" class="form-control" id="localEncontrado" placeholder="Ex: Bloco B, corredor 2" />
+                  <label for="local_encontrado" class="form-label">Local Encontrado</label>
+                  <input type="text" class="form-control" id="local_encontrado" name="local_encontrado" placeholder="Ex: Bloco B, corredor 2" />
                 </div>
               </div>
 
-              <h5 class="mb-3 mt-4">Categoria</h5>
-              <div class="mb-3">
-                <label for="categoria" class="form-label">Selecionar Categoria</label>
-                <select class="form-select" id="categoria">
-                  <option value="documento">Documento</option>
-                  <option value="roupa">Roupa</option>
-                  <option value="celular" selected>Celular</option>
-                  <option value="outros">Outros</option>
-                </select>
-              </div>
-
-              <div id="campos">
-                <div class="row">
-                  <div class="col-md-4 mb-3">
-                    <label for="marca" class="form-label">Marca</label>
-                    <input type="text" class="form-control" id="marca" placeholder="Ex: Samsung" />
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label for="cor" class="form-label">Cor</label>
-                    <input type="text" class="form-control" id="cor" placeholder="Ex: Preto" />
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label for="modelo" class="form-label">Modelo</label>
-                    <input type="text" class="form-control" id="modelo" placeholder="Ex: Galaxy A52" />
-                  </div>
+              {% if categorias %}
+                <h5 class="mb-3 mt-4">Categoria</h5>
+                <div class="mb-3">
+                  <label for="categoria" class="form-label">Selecionar Categoria</label>
+                    <select class="form-select" id="categoria" name="categoria">
+                      {% for categoria in categorias %}
+                        <option value="{{ categoria._id }}">{{ categoria.nome }}</option>
+                      {% endfor %}
+                    </select>
                 </div>
-              </div>
-
+              {% endif %}
               <div>
                 <button type="submit" class="btn btn-primary btn-sm">Cadastrar</button>
               </div>
@@ -104,6 +87,7 @@
 
           <!-- Tabela -->
           <h3 class="mb-3">Listagem de Objetos</h3>
+          {% if objetos %}
           <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
               <thead class="table-dark">
@@ -112,34 +96,23 @@
                   <th>Categoria</th>
                   <th>Identificação</th>
                   <th>Local Encontrado</th>
-                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>02/04/2025</td>
-                  <td>Cartões Diversos</td>
-                  <td></td>
-                  <td>FEQ</td>
-                  <td><a href="#" class="btn btn-sm btn-outline-primary">Editar</a></td>
-                </tr>
-                <tr>
-                  <td>02/04/2025</td>
-                  <td>Garrafa</td>
-                  <td>Gabi Baltazar</td>
-                  <td>Central</td>
-                  <td><a href="#" class="btn btn-sm btn-outline-primary">Editar</a></td>
-                </tr>
-                <tr>
-                  <td>01/04/2025</td>
-                  <td>Chave</td>
-                  <td>Chave Vermelha</td>
-                  <td>Sala das orgs. FCA</td>
-                  <td><a href="#" class="btn btn-sm btn-outline-primary">Editar</a></td>
-                </tr>
+                {% for objeto in objetos %}
+                  <tr>
+                    <td>{{ objeto.data_encontrado }}</td>
+                    <td>{{ objeto.categoria.nome }}</td>
+                    <td>{{ objeto.identificacao }}</td>
+                    <td>{{ objeto.local_encontrado }}</td>
+                  </tr>
+                {% endfor %}
               </tbody>
             </table>
+          {% else %}
+            <p>Nenhum objeto cadastrado! :(</p>
           </div>
+          {% endif %}
         </div>
       </div>
     </div>

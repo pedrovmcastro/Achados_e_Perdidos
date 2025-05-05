@@ -4,12 +4,13 @@ from zoneinfo import ZoneInfo    # fuso horário
 
 from modules.funcionarios import funcionario
 from modules.categorias import categoria
+from modules.objetos import objeto
 
 app = Flask(__name__)
 app.secret_key = '-\x06\xb3\xbd\x15/\xc3\xef~\xd8]\xb3\xef\xd8\xa3\xe5\xa5Sn\xf3SNx\xa9'
 
 app.register_blueprint(categoria)
-#app.register_blueprint(objetos)
+app.register_blueprint(objeto)
 app.register_blueprint(funcionario)
 
 # Filtros #
