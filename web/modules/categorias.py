@@ -52,8 +52,11 @@ def categoria_edit_action(categoria_id):
     nome = request.form.get("nome")
     campos = request.form.getlist('campos[]')
 
+    campos = [c.strip() for c in campos if c.strip()]  # remove vazios e espaços
+    campos = list(dict.fromkeys(campos))  # remove duplicatas
+
     # Validação server-side
-    if not nome and campos:
+    if not nome or not campos:
         flash("Todos os campos obrigatórios devem ser preenchidos!", "bad")
         return redirect(url_for(".categoria_edit", categoria_id=categoria_id))
 
@@ -77,7 +80,7 @@ def categoria_edit_action(categoria_id):
             
     except Exception as e:
         print(f"Erro na atualização: {e}")
-        flash("Erro crítico na atualização do funcionário!", "bad")
+        flash("Erro crítico na atualização da categoria!", "bad")
 
     return redirect(url_for(".categoria_index"))
 
