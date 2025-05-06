@@ -105,6 +105,11 @@
                 <input type="file" class="form-control" id="imagem" name="imagem" />
               </div>
 
+              <div class="mb-3">
+                <label for="identificacao" class="form-label">Identificação</label>
+                <input type="text" class="form-control" id="identificacao" name="identificacao" placeholder="Ex: Cartão com nome “Luiza Souza”">
+              </div>
+
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="data_encontrado" class="form-label">Data Encontrado</label>
@@ -149,23 +154,23 @@
           <table class="table table-striped table-hover align-middle">
             <thead class="table-dark">
               <tr>
+                <th>Categoria</th>
+                <th>Descrição</th>
                 <th>Data</th>
                 <th>Local</th>
-                <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Campos</th>
+                <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {% for objeto in objetos %}
                 <tr>
+                  <td>{{ objeto.categoria.nome }}</td>
+                  <td>{{ objeto.descricao }}</td>
                   <td>{{ objeto.data_encontrado }}</td>
                   <td>{{ objeto.local_encontrado }}</td>
-                  <td>{{ objeto.descricao }}</td>
-                  <td>{{ objeto.categoria.nome }}</td>
-                  {% for campo, valor in objeto.campos.items() %}
-                    <td><strong>{{ campo }}:</strong> {{ valor }}</td>
-                  {% endfor %}
+                  <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a></td>
+                  <td><a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a></td>
                 </tr>
               {% endfor %}
             </tbody>

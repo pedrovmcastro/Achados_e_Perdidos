@@ -76,7 +76,7 @@ def funcionario_edit_action(funcionario_id):
         flash("Todos os campos obrigatórios devem ser preenchidos!", "bad")
         return redirect(url_for(".funcionario_edit", funcionario_id=funcionario_id))
 
-     # Preparar dados para atualização
+    # Preparar dados para atualização
     update_data = {
         "nome": nome,
         "matricula": matricula,

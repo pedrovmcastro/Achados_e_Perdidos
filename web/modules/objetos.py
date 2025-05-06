@@ -92,3 +92,88 @@ def objeto_add():
         flash("Alguma coisa deu errado!", "bad")
 
     return redirect(url_for(".objeto_index"))
+
+
+@objeto.route("/admin/objeto/edit/<string:objeto_id>")
+def objeto_edit(objeto_id):
+    pipeline = [
+        {"$match": {"_id": ObjectId(objeto_id)}},
+        {
+            "$lookup": {
+                "from": "categorias",
+                "localField": "categoria",
+                "foreignField": "_id",
+                "as": "categoria"
+            }
+        },
+        {"$unwind": "$categoria"},
+        {"$sort": {"data_encontrado": -1}}
+    ]
+    resultado = list(db.objetos.aggregate(pipeline))
+    objeto = resultado[0]
+    return render_template("objeto_editar.html", objeto=objeto)
+
+
+@objeto.route("/admin/objeto/edit/<string:objeto_id>/form", methods=["POST"])
+def objeto_edit_action(objeto_id):
+
+    # Coletar dados do formulário
+    descricao = request.form.get("descricao")
+    data_encontrado = request.form.get('data_encontrado')
+    local_encontrado = request.form.get('local_encontrado')
+    imagem = request.form.get("imagem")
+    identificacao = request.form.get("identificacao")
+    resolvido = request.form.get("resolvido")
+    status = request.form.get("status")
+    
+    if not all([data_encontrado, local_encontrado]):
+        flash("Todos os campos obrigatórios devem ser preenchidos!", "bad")
+        return redirect(url_for(".objeto_edit", objeto_id=objeto_id))
+    
+    # Preparar dados para atualização
+    update_data = {
+        "descricao": descricao,
+        "data_encontrado": data_encontrado,
+        "local_encontrado": local_encontrado,
+        "imagem": imagem,
+        "identificacao": identificacao,
+        "resolvido": resolvido == "on",
+        "status": status,
+        "resolucao": request.form.get("resolucao"),
+        "destinatario_nome": request.form.get("destinatario_nome"),
+        "destinatario_nome": request.form.get("destinatario_documento"),
+        "destinatario_nome": request.form.get("destinatario_contato"),
+    }
+
+    if valores_campos := db.objetos.find_one({"_id": ObjectId(objeto_id)}).get("campos_valores", {}):
+        for campo in valores_campos.keys():
+            key = f"campos_valores[{campo}]"
+            valor = request.form.get(key)
+            if valor is not None:
+                valores_campos[campo] = valor
+                update_data["campos_valores"] = valores_campos
+
+    try:
+        # Atualização única no banco de dados
+        result = objetos_collections.update_one(
+            {"_id": ObjectId(objeto_id)},
+            {"$set": update_data}
+        )
+
+        if result.modified_count == 1:
+            flash("Objeto atualizado com sucesso!", "good")
+        else:
+            flash("Nenhuma alteração foi detectada.", "warning")
+            
+    except Exception as e:
+        print(f"Erro na atualização: {e}")
+        flash("Erro crítico na atualização do objeto!", "bad")
+
+    return redirect(url_for(".objeto_index"))
+
+
+
+@objeto.route("/admin/objeto/<string:objeto_id>/delete")
+def objeto_deletar(objeto_id):
+    objetos_collections.delete_one({"_id": ObjectId(objeto_id)})
+    return redirect(url_for(".objeto_index"))
