@@ -36,8 +36,8 @@
         <div class="col-md-3">
           <div class="list-group">
             <a href="/admin/funcionario" class="list-group-item list-group-item-action">Gerenciar Funcionários</a>
-            <a href="#" class="list-group-item list-group-item-action">Gerenciar Categorias</a>
-            <a href="#" class="list-group-item list-group-item-action">Gerenciar Objetos</a>
+            <a href="/admin/categoria" class="list-group-item list-group-item-action">Gerenciar Categorias</a>
+            <a href="/admin/objeto" class="list-group-item list-group-item-action">Gerenciar Objetos</a>
           </div>
         </div>
 
@@ -86,6 +86,7 @@
                   type="checkbox"
                   id="administrador"
                   name="administrador"
+                  {% if not sessao.adiministrador %}disabled{% endif %}
                 />
                 <label class="form-check-label" for="administrador">Administrador</label>
               </div>
