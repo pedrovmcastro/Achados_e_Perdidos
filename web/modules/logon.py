@@ -9,11 +9,11 @@ client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 
 funcionarios_collections = db['objetos']
-logon = Blueprint("objeto", __name__)
+logon = Blueprint("logon", __name__)
 
 
 @logon.route("/logon", methods=["POST"])
-def logon():
+def logon_action():
     matricula = request.form.get("matricula")
     senha = request.form.get("senha")
 
@@ -24,6 +24,7 @@ def logon():
 
     if funcionario:
         session['funcionario_id'] = str(funcionario['_id'])
+        session['nome'] = funcionario['nome']
         session['administrador'] = funcionario.get('administrador', False)
 
     return redirect(url_for('admin'))

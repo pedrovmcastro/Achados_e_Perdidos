@@ -34,9 +34,9 @@
       }
     </style>
     <script>
-window.addEventListener("load", () => {
+window.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#campo").addEventListener("keydown", (e) => {
-    if (e.code === "Enter") {
+    if (e.code === "Enter" || e.code === "NumpadEnter") {
       e.preventDefault();
       tag = e.target.value
       if (tag.length) {
@@ -76,10 +76,23 @@ window.addEventListener("load", () => {
   </head>
   <body>
     <div class="container py-4">
-      <header class="mb-4 pb-3 border-bottom">
+      <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 class="fs-3 text-primary">Achados e Perdidos - Categorias</h1>
+        <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
       </header>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div id="flashes">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+      
       <div class="row g-5">
         <!-- Menu Lateral -->
         <div class="col-md-3">

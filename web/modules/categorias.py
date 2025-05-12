@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
+from decorators import login_required, admin_required
 import secret
 import pymongo
 from datetime import datetime, timezone
@@ -10,7 +11,9 @@ db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware
 categoria_collections = db['categorias']
 categoria = Blueprint("categoria", __name__)
 
+
 @categoria.route("/admin/categoria")
+@login_required
 def categoria_index():
     categorias = []
     for c in categoria_collections.find():
@@ -18,11 +21,21 @@ def categoria_index():
             "id": str(c['_id']),
             "nome": c['nome'],
         })
+    
+    sessao = {
+        "id": session["funcionario_id"],
+        "nome": session["nome"],
+        "administrador": session["administrador"],
+    }
 
     return render_template("categoria.html",
-                           categorias=categorias)
+                           categorias=categorias,
+                           sessao=sessao
+                           )
+
 
 @categoria.route("/admin/categoria/add", methods=["POST"])
+@login_required
 def categoria_add():
     nome = request.form.get("nome")
 
@@ -33,19 +46,29 @@ def categoria_add():
             "nome": nome,
             "campos": campos,
         })
-        flash("Cadastrada com sucesso!", "good")
+        flash("Cadastrado com sucesso!", "success")
     else:
-        flash("Alguma coisa deu errado!", "bad")
+        flash("Alguma coisa deu errado!", "danger")
 
     return redirect(url_for(".categoria_index"))
 
 @categoria.route("/admin/categoria/edit/<string:categoria_id>")
+@login_required
 def categoria_edit(categoria_id):
+    sessao = {
+        "id": session["funcionario_id"],
+        "nome": session["nome"],
+        "administrador": session["administrador"],
+    }
+
     return render_template("categoria_editar.html",
-                           categoria=categoria_collections.find_one({"_id": ObjectId(categoria_id)}))
+                           categoria=categoria_collections.find_one({"_id": ObjectId(categoria_id)}),
+                           sessao=sessao,
+                           )
 
 
 @categoria.route("/admin/categoria/edit/<string:categoria_id>/form", methods=["POST"])
+@login_required
 def categoria_edit_action(categoria_id):
     
     # Coletar dados do formulário
@@ -57,7 +80,7 @@ def categoria_edit_action(categoria_id):
 
     # Validação server-side
     if not nome or not campos:
-        flash("Todos os campos obrigatórios devem ser preenchidos!", "bad")
+        flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
         return redirect(url_for(".categoria_edit", categoria_id=categoria_id))
 
      # Preparar dados para atualização
@@ -74,28 +97,30 @@ def categoria_edit_action(categoria_id):
         )
 
         if result.modified_count == 1:
-            flash("Categoria atualizada com sucesso!", "good")
+            flash("Categoria atualizada com sucesso!", "success")
         else:
             flash("Nenhuma alteração foi detectada.", "warning")
             
     except Exception as e:
         print(f"Erro na atualização: {e}")
-        flash("Erro crítico na atualização da categoria!", "bad")
+        flash("Erro crítico na atualização da categoria!", "danger")
 
     return redirect(url_for(".categoria_index"))
 
 
 @categoria.route("/admin/categoria/delete/<string:categoria_id>")
+@login_required
 def categoria_delete(categoria_id):
     categoria_collections.delete_one({"_id": ObjectId(categoria_id)})
     return redirect(url_for(".categoria_index"))
 
 
 @categoria.route("/api/categoria/<id>")
+@login_required
 def get_categoria(id):
     categoria = categoria_collections.find_one({"_id": ObjectId(id)})
     if not categoria:
-       flash("Categoria não encontrada", "bad")
+       flash("Categoria não encontrada", "danger")
     return jsonify({
         "_id": str(categoria["_id"]),
         "nome": categoria["nome"],

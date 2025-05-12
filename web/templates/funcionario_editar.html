@@ -27,8 +27,9 @@
   </head>
   <body>
     <div class="container py-4">
-      <header class="mb-4 pb-3 border-bottom">
+      <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 class="fs-3 text-primary">Achados e Perdidos - Funcionários</h1>
+        <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
       </header>
 
       <div class="row g-5">
@@ -88,6 +89,7 @@
                   id="administrador"
                   name="administrador"
                   {% if funcionario.administrador %}checked{% endif %}
+                  {% if not sessao.administrador %}disabled{% endif %}
                 />
                 <label class="form-check-label" for="administrador">Administrador</label>
               </div>
@@ -119,6 +121,7 @@
 
               <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Editar</button>
+                {% if sessao.administrador %}
                 <a 
                   href="{{ url_for('funcionario.funcionario_desligar', funcionario_id=funcionario._id) }}" 
                   class="btn btn-danger"
@@ -126,6 +129,7 @@
                 >
                   Desligar
                 </a>
+                {% endif %}
               </div>
             </form>
           </div>
