@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
 import secret
-import .decorators
 import pymongo
 from datetime import datetime, timezone
 
@@ -14,7 +13,6 @@ objeto = Blueprint("objeto", __name__)
 
 
 @objeto.route("/admin/objeto")
-@login_required
 def objeto_index():
     pipeline = [
         {
@@ -51,7 +49,6 @@ def objeto_index():
 
 
 @objeto.route("/admin/objeto/add", methods=["POST"])
-@login_required
 def objeto_add():
     # Buscar a categoria pelo ID
     categoria_id = request.form.get("categoria")
@@ -98,7 +95,6 @@ def objeto_add():
 
 
 @objeto.route("/admin/objeto/edit/<string:objeto_id>")
-@login_required
 def objeto_edit(objeto_id):
     pipeline = [
         {"$match": {"_id": ObjectId(objeto_id)}},
@@ -119,7 +115,6 @@ def objeto_edit(objeto_id):
 
 
 @objeto.route("/admin/objeto/edit/<string:objeto_id>/form", methods=["POST"])
-@login_required
 def objeto_edit_action(objeto_id):
 
     # Coletar dados do formulário
@@ -179,7 +174,6 @@ def objeto_edit_action(objeto_id):
 
 
 @objeto.route("/admin/objeto/<string:objeto_id>/delete")
-@login_required
 def objeto_deletar(objeto_id):
     objetos_collections.delete_one({"_id": ObjectId(objeto_id)})
     return redirect(url_for(".objeto_index"))

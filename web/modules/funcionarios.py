@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
 import secret
-import .decorators
 import pymongo
 from datetime import datetime, timezone
 
@@ -13,7 +12,6 @@ funcionario = Blueprint("funcionario", __name__)
 
 
 @funcionario.route("/admin/funcionario")
-@login_required
 def funcionario_index():
     funcionarios = []
     for f in funcionarios_collections.find():
@@ -25,20 +23,11 @@ def funcionario_index():
             "desligado": f.get('desligado'),
         })
 
-    sessao = {
-        "id": session["funcionario_id"],
-        "administrador": session["administrador"],
-    }
-
     return render_template("funcionario.html",
-                           funcionarios=funcionarios
-                           sessao=sessao
-                           )
+                           funcionarios=funcionarios)
 
 
 @funcionario.route("/admin/funcionario/add", methods=["POST"])
-@login_required
-@admin_required
 def funcionario_add():
     nome = request.form.get("nome")
     matricula = request.form.get("matricula")
@@ -66,20 +55,12 @@ def funcionario_add():
 
 
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>")
-@login_required
 def funcionario_edit(funcionario_id):
-    sessao = {
-        "id": session["funcionario_id"],
-        "administrador": session["administrador"],
-    }
-
     return render_template("funcionario_editar.html",
-                           funcionario=funcionarios_collections.find_one({"_id": ObjectId(funcionario_id)})
-                           sessao=sessao)
+                           funcionario=funcionarios_collections.find_one({"_id": ObjectId(funcionario_id)}))
 
 
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>/form", methods=["POST"])
-@login_required
 def funcionario_edit_action(funcionario_id):
     
     # Coletar dados do formulário
@@ -130,8 +111,6 @@ def funcionario_edit_action(funcionario_id):
 
 
 @funcionario.route("/admin/funcionario/<string:funcionario_id>/desligar")
-@login_required
-@admin_required
 def funcionario_desligar(funcionario_id):
     funcionarios_collections.update_one(
         {"_id": ObjectId(funcionario_id)},
