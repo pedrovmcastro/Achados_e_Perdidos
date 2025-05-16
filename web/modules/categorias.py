@@ -21,11 +21,10 @@ def categoria_index():
             "id": str(c['_id']),
             "nome": c['nome'],
         })
-    
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
 
     return render_template("categoria.html",
@@ -56,9 +55,9 @@ def categoria_add():
 @login_required
 def categoria_edit(categoria_id):
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
 
     return render_template("categoria_editar.html",

@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session
 
 from decorators import login_required
 from zoneinfo import ZoneInfo    # fuso horário
@@ -34,9 +34,16 @@ def jinja_format_datetime(value):
 def index():
     return render_template('index.html')
 
+
 @app.route('/admin/')
+@login_required
 def admin():
-    return render_template('admin.html')
+    sessao = {
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
+    }
+    return render_template('admin.html', sessao=sessao)
 
 
 @app.route('/login/')
