@@ -15,7 +15,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('administrador'):
-            flash("Somente para administradores!", "bad")
+            flash("Somente para administradores!", "danger")
             return redirect(url_for("admin"))
         return f(*args, **kwargs)
     return decorated_function
