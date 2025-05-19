@@ -61,11 +61,17 @@ def objeto_index():
 @login_required
 def objeto_add():
     # Buscar a categoria pelo ID
-    categoria_id = request.form.get("categoria")
+    print()
+    categoria_id = request.form.get("categoria", None)
+
+    if not categoria_id:
+        flash("Alguma coisa deu errado!", "danger")
+        return redirect(url_for(".objeto_index"))
+    
     categoria = db.categorias.find_one({"_id": ObjectId(categoria_id)})
 
     if not categoria:
-        flash("Categoria inválida", "danger")
+        flash("Alguma coisa deu errado!", "danger")
         return redirect(url_for(".objeto_index"))
     
     # Dados fixos

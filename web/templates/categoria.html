@@ -85,8 +85,9 @@ window.addEventListener("DOMContentLoaded", () => {
       {% if messages %}
       <div id="flashes">
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
           {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
       </div>
@@ -128,7 +129,7 @@ window.addEventListener("DOMContentLoaded", () => {
                   class="form-control"
                   id="campo"
                   name="campo"
-                  placeholder="Campos"
+                  placeholder="Campos (enter adiciona novos)"
                 />
               </div>
 

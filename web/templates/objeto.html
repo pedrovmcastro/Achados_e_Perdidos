@@ -80,6 +80,19 @@
         <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
       </header>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div id="flashes">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
       <div class="row g-5">
         <!-- Menu Lateral -->
         <div class="col-md-3">
@@ -90,23 +103,11 @@
           </div>
         </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div id="flashes">
-          {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">
-            {{ message }}
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
-
         <!-- Conteúdo Principal -->
         <div class="col-md-9">
           <h3 class="mb-3">Cadastrar Objeto</h3>
           <div class="card p-4 mb-5">
-            <form action="/admin/objeto/add" method="post">
+            <form action="/admin/objeto/add" method="post" enctype="multipart/form-data">
               <h5 class="mb-3">Descrição</h5>
               <div class="mb-3">
                 <label for="descricao" class="form-label">Descrição do Objeto</label>
@@ -170,7 +171,6 @@
                     <th>Data</th>
                     <th>Local</th>
                     <th></th>
-                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -180,8 +180,8 @@
                       <td>{{ objeto.descricao }}</td>
                       <td>{{ objeto.data_encontrado }}</td>
                       <td>{{ objeto.local_encontrado }}</td>
-                      <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a></td>
-                      <td><a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a></td>
+                      <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a>
+                      <td>{% if sessao.administrador %}<a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a>{% endif %}</td>
                     </tr>
                   {% endfor %}
                 </tbody>

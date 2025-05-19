@@ -36,8 +36,9 @@
       {% if messages %}
       <div id="flashes">
         {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
           {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         {% endfor %}
       </div>
@@ -59,6 +60,7 @@
           <!-- Cadastro de Funcionário -->
           <h3 class="mb-3">Novo Funcionário</h3>
           <div class="card p-4 mb-5">
+            {% if sessao.administrador %}
             <form action="/admin/funcionario/add" method="post">
               <div class="mb-3">
                 <label for="nome" class="form-label">Nome</label>
@@ -99,7 +101,6 @@
                   type="checkbox"
                   id="administrador"
                   name="administrador"
-                  {% if not sessao.administrador %}disabled{% endif %}
                 />
                 <label class="form-check-label" for="administrador">Administrador</label>
               </div>
@@ -132,6 +133,10 @@
               </div>
               
             </form>
+
+            {% else %}
+            <p class="centered">Somente para administradors</p>
+            {% endif %}
           </div>
 
       <hr />
@@ -144,7 +149,6 @@
             <th>Nome</th>
             <th>Matricula</th>
             <th>Ligado</th>
-            <th>Desligado</th>
             <th></th>
           </tr>
         </thead>
@@ -154,14 +158,46 @@
             <td>{{ funcionario.nome }}</td>
             <td>{{ funcionario.matricula }}</td>
             <td>{{ funcionario.ligado|format_datetime }}</td>
-            <td>{{ funcionario.desligado|format_datetime }}</td>
-            <td><a class="btn btn-sm btn-outline-primary" href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a></td>
+            <td>{% if sessao.administrador or sessao.id == funcionario.id %}<a class="btn btn-sm btn-outline-primary" href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a>{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
       {% else %}
       <p>Nenhum funcionário cadastrado! :(</p>
+      {% endif %}
+
+      {% if sessao.administrador %}
+
+      <hr />
+
+      <h3 class="mb-4">Listagem de Funcionários Desligados</h3>
+      {% if desligados %}
+      <table class="table table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>Nome</th>
+            <th>Matricula</th>
+            <th>Ligado</th>
+            <th>Desligado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for funcionario in desligados %}
+          <tr>
+            <td>{{ funcionario.nome }}</td>
+            <td>{{ funcionario.matricula }}</td>
+            <td>{{ funcionario.ligado|format_datetime }}</td>
+            <td>{{ funcionario.desligado|format_datetime }}</td>
+            <td>{% if sessao.administrador or sessao.id == funcionario.id %}<a class="btn btn-sm btn-outline-primary" href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Nenhum funcionário desligado! :(</p>
+      {% endif %}
       {% endif %}
     </div>
 

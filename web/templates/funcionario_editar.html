@@ -81,7 +81,7 @@
                   placeholder="Digite uma nova senha"
                 />
               </div>
-
+              {% if sessao.administrador %}
               <div class="form-check form-switch mb-4">
                 <input
                   class="form-check-input"
@@ -89,10 +89,10 @@
                   id="administrador"
                   name="administrador"
                   {% if funcionario.administrador %}checked{% endif %}
-                  {% if not sessao.administrador %}disabled{% endif %}
                 />
                 <label class="form-check-label" for="administrador">Administrador</label>
               </div>
+              {% endif %}
 
               <h5 class="mb-3">Endereço</h5>
               <div class="mb-3">
@@ -122,6 +122,15 @@
               <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Editar</button>
                 {% if sessao.administrador %}
+                {% if funcionario.desligado %}
+                <a 
+                  href="{{ url_for('funcionario.funcionario_religar', funcionario_id=funcionario._id) }}" 
+                  class="btn btn-success"
+                  onclick="return confirm('Tem certeza que deseja religar este funcionário?')"
+                >
+                  Religar
+                </a>
+                {% else %}
                 <a 
                   href="{{ url_for('funcionario.funcionario_desligar', funcionario_id=funcionario._id) }}" 
                   class="btn btn-danger"
@@ -129,6 +138,7 @@
                 >
                   Desligar
                 </a>
+                {% endif %}
                 {% endif %}
               </div>
             </form>

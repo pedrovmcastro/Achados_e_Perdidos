@@ -4,6 +4,7 @@ from bson.codec_options import CodecOptions
 from decorators import login_required, admin_required
 import secret
 import pymongo
+import hashlib
 from datetime import datetime, timezone
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
@@ -15,29 +16,38 @@ funcionario = Blueprint("funcionario", __name__)
 @funcionario.route("/admin/funcionario")
 @login_required
 def funcionario_index():
-    funcionarios = []
-    for f in funcionarios_collections.find():
-        funcionarios.append({
-            "id": str(f['_id']),
-            "nome": f['nome'],
-            "matricula": f['matricula'],
-            "ligado": f['ligado'],
-            "desligado": f.get('desligado'),
-        })
     sessao = {
         "id": session.get("funcionario_id", ""),
         "nome": session.get("nome", ""),
         "administrador": session.get("administrador", ""),
     }
 
+    funcionarios = []
+    desligados = []
+    for f in funcionarios_collections.find():
+        funcionario = {
+            "id": str(f['_id']),
+            "nome": f['nome'],
+            "matricula": f['matricula'],
+            "ligado": f['ligado'],
+            "desligado": f.get('desligado'),
+        }
+
+        if funcionario["desligado"] is not None:
+            desligados.append(funcionario)
+        else:
+            funcionarios.append(funcionario)
+
     return render_template("funcionario.html",
                            funcionarios=funcionarios,
+                           desligados=desligados,
                            sessao=sessao
                            )
 
 
 @funcionario.route("/admin/funcionario/add", methods=["POST"])
 @login_required
+@admin_required
 def funcionario_add():
     nome = request.form.get("nome")
     matricula = request.form.get("matricula")
@@ -47,6 +57,14 @@ def funcionario_add():
     cep = request.form.get("cep")
 
     if nome and matricula and senha and rua and cep:
+        funcionario = funcionarios_collections.find_one({
+            "matricula": matricula,
+        })
+
+        if funcionario:
+            flash("Matricula tem que ser única!", "danger")
+            return redirect(url_for(".funcionario_index"))
+
         funcionarios_collections.insert_one({
             "nome": nome,
             "matricula": matricula,
@@ -56,7 +74,7 @@ def funcionario_add():
                 "cep": cep,
             },
             "ligado": datetime.now(timezone.utc),
-            "senha": senha,
+            "senha": hashlib.sha256(senha.encode('utf-8')).hexdigest(),
         })
         flash("Cadastrado com sucesso!", "success")
     else:
@@ -96,7 +114,7 @@ def funcionario_edit_action(funcionario_id):
     if not all([nome, matricula, rua, cep]):
         flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
         return redirect(url_for(".funcionario_edit", funcionario_id=funcionario_id))
-
+    
     # Preparar dados para atualização
     update_data = {
         "nome": nome,
@@ -105,12 +123,12 @@ def funcionario_edit_action(funcionario_id):
         "endereco": {
             "rua": rua,
             "cep": cep
-        }
+        },
     }
 
     # Atualizar senha apenas se for fornecida
     if senha:
-        update_data["senha"] = senha
+        update_data["senha"] = hashlib.sha256(senha.encode('utf-8')).hexdigest()
 
     try:
         # Atualização única no banco de dados
@@ -139,6 +157,21 @@ def funcionario_desligar(funcionario_id):
         {
                 "$set": {
                     "desligado": datetime.now(timezone.utc),
+                }
+            }
+        )
+    return redirect(url_for(".funcionario_index"))
+
+
+@funcionario.route("/admin/funcionario/<string:funcionario_id>/religar")
+@login_required
+def funcionario_religar(funcionario_id):
+    funcionarios_collections.update_one(
+        {"_id": ObjectId(funcionario_id)},
+        {
+                "$set": {
+                    "desligado": None,
+                    "ligado": datetime.now(timezone.utc),
                 }
             }
         )
