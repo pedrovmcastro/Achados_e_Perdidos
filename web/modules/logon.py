@@ -33,5 +33,6 @@ def logon_action():
 @logon.route('/logout')
 def logout():
     session.pop('funcionario_id', None)
+    session.pop('nome', None)
     session.pop('administrador', None)
     return redirect(url_for('login'))

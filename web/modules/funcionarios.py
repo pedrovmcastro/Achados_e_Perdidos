@@ -25,9 +25,9 @@ def funcionario_index():
             "desligado": f.get('desligado'),
         })
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
 
     return render_template("funcionario.html",
@@ -56,6 +56,7 @@ def funcionario_add():
                 "cep": cep,
             },
             "ligado": datetime.now(timezone.utc),
+            "senha": senha,
         })
         flash("Cadastrado com sucesso!", "success")
     else:
@@ -68,11 +69,10 @@ def funcionario_add():
 @login_required
 def funcionario_edit(funcionario_id):
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
-
 
     return render_template("funcionario_editar.html",
                            funcionario=funcionarios_collections.find_one({"_id": ObjectId(funcionario_id)}),

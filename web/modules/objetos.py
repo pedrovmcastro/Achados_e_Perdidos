@@ -44,11 +44,10 @@ def objeto_index():
         if isinstance(cat["_id"], ObjectId):
             cat["_id"] = str(cat["_id"])
         cat["campos"] = cat.get("campos", [])
-
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
 
     return render_template("objeto.html",
@@ -123,11 +122,10 @@ def objeto_edit(objeto_id):
     ]
     resultado = list(db.objetos.aggregate(pipeline))
     objeto = resultado[0]
-
     sessao = {
-        "id": session["funcionario_id"],
-        "nome": session["nome"],
-        "administrador": session["administrador"],
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
     }
     return render_template("objeto_editar.html",
                            objeto=objeto,
