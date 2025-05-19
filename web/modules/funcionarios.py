@@ -37,7 +37,6 @@ def funcionario_index():
             desligados.append(funcionario)
         else:
             funcionarios.append(funcionario)
-        })
 
     return render_template("funcionario.html",
                            funcionarios=funcionarios,
