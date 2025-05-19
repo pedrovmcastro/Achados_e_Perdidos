@@ -1,14 +1,15 @@
-from flask import Blueprint, request, redirect, url_for, session
+from flask import Blueprint, request, redirect, url_for, session, flash
 from bson.codec_options import CodecOptions
 import secret
 import pymongo
+import hashlib
 from datetime import timezone
 
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 
-funcionarios_collections = db['objetos']
+funcionarios_collections = db['funcionarios']
 logon = Blueprint("logon", __name__)
 
 
@@ -17,17 +18,22 @@ def logon_action():
     matricula = request.form.get("matricula")
     senha = request.form.get("senha")
 
-    funcionario = funcionarios_collections.find_one({
-        "matricula": matricula,
-        "senha": senha,
-    })
+    if matricula and senha:
+        funcionario = funcionarios_collections.find_one({
+            "matricula": matricula,
+            "senha": hashlib.sha256(senha.encode('utf-8')).hexdigest(),
+        })
 
-    if funcionario:
-        session['funcionario_id'] = str(funcionario['_id'])
-        session['nome'] = funcionario['nome']
-        session['administrador'] = funcionario.get('administrador', False)
+        if funcionario:
+            session['funcionario_id'] = str(funcionario['_id'])
+            session['nome'] = funcionario['nome']
+            session['administrador'] = funcionario.get('administrador', False)
 
-    return redirect(url_for('admin'))
+            flash("Login com sucesso!", "success")
+            return redirect(url_for('admin'))
+
+    flash("Login Inválido!", "danger")
+    return redirect(url_for('login'))
 
 
 @logon.route('/logout')

@@ -38,6 +38,19 @@
         <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
       </header>
 
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div id="flashes">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
       <div class="row g-5">
         <!-- Menu Lateral -->
         <div class="col-md-3">

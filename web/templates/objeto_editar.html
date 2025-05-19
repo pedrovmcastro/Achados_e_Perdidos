@@ -43,15 +43,15 @@
     </script>
   </head>
   <body>
-    <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
-      <h1 class="fs-3 text-primary">Achados e Perdidos - Objetos</h1>
-      <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
-    </header>
+    <div class="container py-4">
+      <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
+        <h1 class="fs-3 text-primary">Achados e Perdidos - Objetos</h1>
+        <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
+      </header>
 
-    <div class="p-4">
-      <div class="row">
-        <!-- Coluna do menu lateral -->
-        <div class="col-md-3 mb-3">
+      <div class="row g-5">
+        <!-- Menu Lateral -->
+        <div class="col-md-3">
           <div class="list-group">
             <a href="/admin/funcionario" class="list-group-item list-group-item-action">Gerenciar Funcionários</a>
             <a href="/admin/categoria" class="list-group-item list-group-item-action">Gerenciar Categorias</a>
@@ -127,9 +127,10 @@
                 </select>
               </div>
 
-              <div id="resolucaoContainer"> 
+              <div id="resolucaoContainer">
+                <hr />
                 <!-- Seção Resolução -->
-                <h5 class="mb-3 mt-5">Resolução</h5>
+                <h5 class="mb-3 mt-2">Resolução</h5>
                 <div class="mb-4">
                   <label for="resolucao" class="form-label"><strong>Descrição da Resolução</strong></label>
                   <textarea class="form-control" id="resolucao" rows="2" placeholder="Ex: Objeto entregue ao proprietário mediante apresentação de documento." name="resolucao">{{ objeto.resolucao | trim }}</textarea>
@@ -161,7 +162,6 @@
         </div>
       </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
