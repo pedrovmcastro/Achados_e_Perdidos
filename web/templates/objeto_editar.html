@@ -46,7 +46,7 @@
     <div class="container py-4">
       <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 class="fs-3 text-primary">Achados e Perdidos - Objetos</h1>
-        <p>{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
+        <p>{% if sessao.administrador %}<span class="text-warning">Admin</span> {% endif %}{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
       </header>
 
       <div class="row g-5">
