@@ -10,7 +10,21 @@ from datetime import datetime, timezone
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 objetos_collections = db['objetos']
+categorias_collections = db['categorias']
 objeto = Blueprint("objeto", __name__)
+
+
+def get_objetos_perdidos():
+    query = {"status": "perdido"}
+    objetos = list(objetos_collections.find(query))
+    
+    categorias = {cat['_id']: cat for cat in categorias_collections.find()}
+
+    for objeto in objetos:
+        cat_id = objeto.get('categoria')
+        objeto['categoria'] = categorias.get(cat_id, {'nome': ''})
+
+    return objetos
 
 
 @objeto.route("/admin/objeto")
