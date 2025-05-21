@@ -29,7 +29,7 @@
     <div class="container py-4">
       <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 class="fs-3 text-primary">Achados e Perdidos - Funcionários</h1>
-        <p>{% if sessao.administrador %}<span class="text-warning">Admin</span> {% endif %}{{ sessao.nome }} - <a href="/logout">deslogar</a></p>
+        <p>{% if sessao.administrador %}<span class="text-warning">{{ sessao.nome }}</span>{% else %}{{ sessao.nome }}{% endif %} - <a href="/logout">deslogar</a></p>
       </header>
       
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -158,7 +158,7 @@
             <td>{{ funcionario.nome }}</td>
             <td>{{ funcionario.matricula }}</td>
             <td>{{ funcionario.ligado|format_datetime }}</td>
-            <td>{% if sessao.administrador or sessao.id == funcionario.id %}<a class="btn btn-sm btn-outline-primary" href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a>{% endif %}</td>
+            <td>{% if (sessao.administrador or sessao.id == funcionario.id) and funcionario.id != "682e4ad7c6002bc2c0163de8" %}<a class="btn btn-sm btn-outline-primary" href="/admin/funcionario/edit/{{ funcionario.id }}">Editar</a>{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>
