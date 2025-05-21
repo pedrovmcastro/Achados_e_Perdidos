@@ -86,6 +86,10 @@ def funcionario_add():
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>")
 @login_required
 def funcionario_edit(funcionario_id):
+    if funcionario_id == '682e4ad7c6002bc2c0163de8':
+        flash("Não pode editar o Admin!", "danger")
+        return redirect(url_for(".funcionario_index"))
+
     sessao = {
         "id": session.get("funcionario_id", ""),
         "nome": session.get("nome", ""),
@@ -101,7 +105,6 @@ def funcionario_edit(funcionario_id):
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>/form", methods=["POST"])
 @login_required
 def funcionario_edit_action(funcionario_id):
-    
     # Coletar dados do formulário
     nome = request.form.get("nome")
     matricula = request.form.get("matricula")
@@ -110,11 +113,15 @@ def funcionario_edit_action(funcionario_id):
     rua = request.form.get("rua")
     cep = request.form.get("cep")
 
+    if funcionario_id == '682e4ad7c6002bc2c0163de8':
+        flash("Não pode editar o Admin!", "danger")
+        return redirect(url_for(".funcionario_index"))
+
     # Validação server-side
     if not all([nome, matricula, rua, cep]):
         flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
         return redirect(url_for(".funcionario_edit", funcionario_id=funcionario_id))
-    
+
     # Preparar dados para atualização
     update_data = {
         "nome": nome,
@@ -141,7 +148,7 @@ def funcionario_edit_action(funcionario_id):
             flash("Funcionário atualizado com sucesso!", "success")
         else:
             flash("Nenhuma alteração foi detectada.", "warning")
-            
+
     except Exception as e:
         print(f"Erro na atualização: {e}")
         flash("Erro crítico na atualização do funcionário!", "danger")
@@ -152,6 +159,10 @@ def funcionario_edit_action(funcionario_id):
 @funcionario.route("/admin/funcionario/<string:funcionario_id>/desligar")
 @login_required
 def funcionario_desligar(funcionario_id):
+    if funcionario_id == '682e4ad7c6002bc2c0163de8':
+        flash("Não pode editar o Admin!", "danger")
+        return redirect(url_for(".funcionario_index"))
+
     funcionarios_collections.update_one(
         {"_id": ObjectId(funcionario_id)},
         {
@@ -166,6 +177,7 @@ def funcionario_desligar(funcionario_id):
 @funcionario.route("/admin/funcionario/<string:funcionario_id>/religar")
 @login_required
 def funcionario_religar(funcionario_id):
+
     funcionarios_collections.update_one(
         {"_id": ObjectId(funcionario_id)},
         {
@@ -173,8 +185,8 @@ def funcionario_religar(funcionario_id):
                     "desligado": None,
                     "ligado": datetime.now(timezone.utc),
                 }
-            }
-        )
+        }
+    )
     return redirect(url_for(".funcionario_index"))
 
 

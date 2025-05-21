@@ -24,7 +24,7 @@ def logon_action():
             "senha": hashlib.sha256(senha.encode('utf-8')).hexdigest(),
         })
 
-        if funcionario and not funcionario["deligado"]:
+        if funcionario and not funcionario.get("desligado"):
             session['funcionario_id'] = str(funcionario['_id'])
             session['nome'] = funcionario['nome']
             session['administrador'] = funcionario.get('administrador', False)
