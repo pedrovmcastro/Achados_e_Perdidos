@@ -12,6 +12,10 @@ categoria_collections = db['categorias']
 categoria = Blueprint("categoria", __name__)
 
 
+def get_categorias():
+    return list(categoria_collections.find())
+
+
 @categoria.route("/admin/categoria")
 @login_required
 def categoria_index():
