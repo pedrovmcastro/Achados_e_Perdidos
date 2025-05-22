@@ -148,9 +148,8 @@
                 </div>
 
                 <div class="mb-3" id="camposContainer">
-                    
-
                 </div>
+
               {% endif %}
               <div>
                 <button type="submit" class="btn btn-primary btn-sm">Cadastrar</button>
@@ -171,8 +170,7 @@
                     <th>Data</th>
                     <th>Local</th>
                     <th></th>
-                    <th></th>
-                  </tr>
+                </tr>
                 </thead>
                 <tbody>
                   {% for objeto in objetos %}
@@ -182,7 +180,6 @@
                       <td>{{ objeto.data_encontrado }}</td>
                       <td>{{ objeto.local_encontrado }}</td>
                       <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a>
-                      <td>{% if sessao.administrador %}<a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a>{% endif %}</td>
                     </tr>
                   {% endfor %}
                 </tbody>

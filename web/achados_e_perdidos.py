@@ -18,8 +18,6 @@ app.register_blueprint(funcionario)
 app.register_blueprint(logon)
 
 
-# Filtros #
-@app.template_filter('format_datetime')
 def jinja_format_datetime(value):
     if value is None:
         return ""
