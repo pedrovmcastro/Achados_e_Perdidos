@@ -1,3 +1,5 @@
+{% set estados = ["perdido", "doado", "entregue"] %}
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -64,7 +66,7 @@
           <h3 class="mb-4">Editar Objeto</h3>
           <div class="card p-4">
             <!-- Formulário de edição de objeto -->
-            <form action="/admin/objeto/edit/{{ objeto._id }}/form" method="post">
+            <form action="/admin/objeto/edit/{{ objeto._id }}/form" method="post" enctype="multipart/form-data">
               <!-- Seção Descrição -->
               <h5 class="mb-3">Descrição</h5>
               <div class="mb-3">
@@ -75,8 +77,20 @@
               <!-- Seção Imagem -->
               <div class="mb-3">
                 <label for="imagem" class="form-label"><strong>Upload de Imagem</strong></label>
-                <input type="file" class="form-control" id="imagem">
+                <input type="file" class="form-control" id="imagem" name="imagem">
               </div>
+
+              {% if objeto.imagem %}
+              <div class="mb-3">
+                <div class="form-check">
+                  <label class="form-check-label" for="removerImagem">
+                    Remover imagem
+                  </label>
+                  <input class="form-check-input" type="checkbox" name="removerImagem">
+                </div>
+                <img src="{{ url_for('static', filename=objeto.imagem) }}" class="img-thumbnail">
+              </div>
+              {% endif %}
 
               <!-- Seção Identificação -->
               <div class="mb-3">
@@ -121,9 +135,9 @@
                 <label for="status" class="form-label"><strong>Status<span class="text-danger">*</span></strong></label>
                 <select class="form-select" id="statusSelect" name="status">
                   <option value="">Selecione o status</option>
-                  <option value="perdido" {% if objeto.status == 'perdido' %}selected{% endif %}>Perdido</option>
-                  <option value="doado" {% if objeto.status == 'doado' %}selected{% endif %}>Doado</option>
-                  <option value="entregue" {% if objeto.status == 'entregue' %}selected{% endif %}>Entregue</option>
+                  {% for estado in estados %}
+                  <option value="{{ estado }}" {% if objeto.status == estado %}selected{% endif %}>{{ estado.capitalize() }}</option>
+                  {% endfor %}
                 </select>
               </div>
 
@@ -137,25 +151,26 @@
                 </div>
 
                 <!-- Seção Destinatário -->
+                {% set destinatario = objeto.get('destinatario', {}) %}
                 <h5 class="mb-3">Destinatário</h5>
                 <div class="row">
                   <div class="col-md-4 mb-3">
                     <label for="destNome" class="form-label"><strong>Nome<span class="text-danger">*</span></strong></label>
-                    <input type="text" class="form-control" id="destNome" name="destinatario_nome" placeholder="Nome completo" value="{{ objeto.destinatario_nome }}">
+                    <input type="text" class="form-control" id="destNome" name="destinatario_nome" placeholder="Nome completo" value="{{ destinatario.get('nome', '') }}">
                   </div>
                   <div class="col-md-4 mb-3">
                     <label for="destDocumento" class="form-label"><strong>Documento<span class="text-danger">*</span></strong></label>
-                    <input type="text" class="form-control" id="destDocumento" name="destinatario_documento" placeholder="CPF, RG..." value="{{ objeto.destinatario_documento }}">
+                    <input type="text" class="form-control" id="destDocumento" name="destinatario_documento" placeholder="CPF, RG..." value="{{ destinatario.get('documento', '') }}">
                   </div>
                   <div class="col-md-4 mb-3">
                     <label for="destContato" class="form-label"><strong>Contato<span class="text-danger">*</span></strong></label>
-                    <input type="text" class="form-control" id="destContato" name="destinatario_contato" placeholder="Telefone ou e-mail" value="{{ objeto.destinatario_contato }}">
+                    <input type="text" class="form-control" id="destContato" name="destinatario_contato" placeholder="Telefone ou e-mail" value="{{ destinatario.get('contato', '') }}">
                   </div>
                 </div>
               </div>
 
-              <div class="d-grid mt-4">
-                <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
+              <div>
+                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
               </div>
             </form>
           </div>
