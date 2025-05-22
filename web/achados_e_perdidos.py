@@ -2,10 +2,11 @@ from flask import Flask, render_template, session
 
 from decorators import login_required
 from zoneinfo import ZoneInfo    # fuso horário
+from datetime import datetime
 
 from modules.funcionarios import funcionario
-from modules.categorias import categoria
-from modules.objetos import objeto
+from modules.categorias import categoria, get_categorias
+from modules.objetos import objeto, get_objetos_perdidos
 from modules.logon import logon
 
 app = Flask(__name__)
@@ -22,17 +23,32 @@ app.register_blueprint(logon)
 def jinja_format_datetime(value):
     if value is None:
         return ""
+
+    # Converte string para datetime se necessário
+    if isinstance(value, str):
+        try:
+            # Tenta parsear com hora
+            value = datetime.strptime(value, "%Y-%m-%d")
+        except ValueError:
+            return value  # Deixa como está se o formato for desconhecido
+
+    # Ajusta para fuso horário
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=ZoneInfo("UTC"))  # assume UTC se não tiver tz
+
     # Converte para o fuso horário de São Paulo
     local_tz = ZoneInfo("America/Sao_Paulo")
     value_local = value.astimezone(local_tz)
-    return value_local.strftime("%d/%m/%Y %H:%M")
+    return value_local.strftime("%d/%m/%Y")
 
 
 # ----- #
 # Index #
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html',
+                           objetos_perdidos=get_objetos_perdidos(),
+                           categorias=get_categorias())
 
 
 @app.route('/admin/')
