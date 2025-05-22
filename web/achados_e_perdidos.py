@@ -23,7 +23,7 @@ app.register_blueprint(logon)
 def jinja_format_datetime(value):
     if value is None:
         return ""
-    
+
     # Converte string para datetime se necessário
     if isinstance(value, str):
         try:

@@ -87,10 +87,10 @@
           <tbody>
             {% for objeto in objetos_perdidos %}
               <tr>
-                <td>{{ objeto['categoria']['nome'] }}</td>
-                <td>{{ objeto['identificacao'] }}</td>
-                <td>{{ objeto['data_encontrado']|format_datetime }}</td>
-                <td>{{ objeto['local_encontrado'] }}</td>
+                <td>{{ objeto.categoria.nome }}</td>
+                <td>{{ objeto.identificacao }}</td>
+                <td>{{ objeto.data_encontrado|format_datetime }}</td>
+                <td>{{ objeto.local_encontrado }}</td>
               </tr>
             {% endfor %}
           </tbody>

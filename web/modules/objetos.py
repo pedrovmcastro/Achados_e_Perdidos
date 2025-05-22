@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
 from decorators import login_required
+from upload import salvar_arquivo
 import secret
 import pymongo
 from datetime import datetime, timezone
@@ -17,7 +18,7 @@ objeto = Blueprint("objeto", __name__)
 def get_objetos_perdidos():
     query = {"status": "perdido"}
     objetos = list(objetos_collections.find(query))
-    
+
     categorias = {cat['_id']: cat for cat in categorias_collections.find()}
 
     for objeto in objetos:
@@ -49,9 +50,9 @@ def objeto_index():
         obj['campos'] = {
             campo: valores.get(campo, '') for campo in obj['categoria'].get('campos', [])
         }
-    
+
     # Busca todas as categorias do banco
-    categorias = list(db.categorias.find())  
+    categorias = list(db.categorias.find())
 
     # Converta os ObjectId em strings para evitar erro no `tojson`
     for cat in categorias:
@@ -74,20 +75,28 @@ def objeto_index():
 @objeto.route("/admin/objeto/add", methods=["POST"])
 @login_required
 def objeto_add():
-    # Buscar a categoria pelo ID
-    print()
     categoria_id = request.form.get("categoria", None)
 
     if not categoria_id:
         flash("Alguma coisa deu errado!", "danger")
         return redirect(url_for(".objeto_index"))
-    
+
     categoria = db.categorias.find_one({"_id": ObjectId(categoria_id)})
 
     if not categoria:
         flash("Alguma coisa deu errado!", "danger")
         return redirect(url_for(".objeto_index"))
-    
+
+    caminho_da_imagem = None
+    if 'imagem' in request.files:
+        imagem = request.files['imagem']
+
+        if imagem.filename:
+            caminho_da_imagem = salvar_arquivo(imagem)
+
+            if not caminho_da_imagem:
+                flash('Tipo de arquivo da imagem não permitido ou falha ao salvar.', 'danger')
+
     # Dados fixos
     descricao = request.form.get("descricao")
     data_encontrado = request.form.get('data_encontrado')
@@ -99,15 +108,14 @@ def objeto_add():
         # o nome do campo no form é 'campos_valores[<campo>]'
         key = f"campos_valores[{campo}]"
         valor = request.form.get(key)
-        # só adiciona se houver valor (pode querer armazenar string vazia também)
         if valor is not None:
             valores_campos[campo] = valor
-    
+
     # Monta o documento para inserir
     if data_encontrado and local_encontrado:
         objetos_collections.insert_one({
             "descricao": descricao,
-            "imagem": request.form.get("imagem"),
+            "imagem": caminho_da_imagem,
             "categoria": ObjectId(categoria_id),
             "data_insercao": datetime.now(timezone.utc),
             "data_encontrado": data_encontrado,
@@ -160,31 +168,50 @@ def objeto_edit_action(objeto_id):
     descricao = request.form.get("descricao")
     data_encontrado = request.form.get('data_encontrado')
     local_encontrado = request.form.get('local_encontrado')
-    imagem = request.form.get("imagem")
     identificacao = request.form.get("identificacao")
     resolvido = request.form.get("resolvido")
     status = request.form.get("status")
-    
+    remover_imagem = request.form.get("removerImagem")
+
     if not all([data_encontrado, local_encontrado]):
         flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
         return redirect(url_for(".objeto_edit", objeto_id=objeto_id))
-    
+
+    objeto = db.objetos.find_one({"_id": ObjectId(objeto_id)})
+
+    caminho_da_imagem = None
+    if not remover_imagem:
+        if 'imagem' in request.files:
+            imagem = request.files['imagem']
+
+            if imagem.filename:
+                caminho_da_imagem = salvar_arquivo(imagem)
+
+                if not caminho_da_imagem:
+                    flash('Tipo de arquivo da imagem não permitido ou falha ao salvar.', 'danger')
+
+        if not caminho_da_imagem:
+            caminho_da_imagem = objeto.get("imagem")
+
     # Preparar dados para atualização
     update_data = {
         "descricao": descricao,
         "data_encontrado": data_encontrado,
         "local_encontrado": local_encontrado,
-        "imagem": imagem,
+        "imagem": caminho_da_imagem,
         "identificacao": identificacao,
         "resolvido": resolvido == "on",
         "status": status,
         "resolucao": request.form.get("resolucao"),
-        "destinatario_nome": request.form.get("destinatario_nome"),
-        "destinatario_nome": request.form.get("destinatario_documento"),
-        "destinatario_nome": request.form.get("destinatario_contato"),
+        "destinatario": {
+            "nome": request.form.get("destinatario_nome"),
+            "documento": request.form.get("destinatario_documento"),
+            "contato": request.form.get("destinatario_contato"),
+        }
     }
 
-    if valores_campos := db.objetos.find_one({"_id": ObjectId(objeto_id)}).get("campos_valores", {}):
+    valores_campos = objeto.get("campos_valores", {})
+    if valores_campos:
         for campo in valores_campos.keys():
             key = f"campos_valores[{campo}]"
             valor = request.form.get(key)
@@ -203,13 +230,12 @@ def objeto_edit_action(objeto_id):
             flash("Objeto atualizado com sucesso!", "success")
         else:
             flash("Nenhuma alteração foi detectada.", "warning")
-            
+
     except Exception as e:
         print(f"Erro na atualização: {e}")
         flash("Erro crítico na atualização do objeto!", "danger")
 
     return redirect(url_for(".objeto_index"))
-
 
 
 @objeto.route("/admin/objeto/<string:objeto_id>/delete")
