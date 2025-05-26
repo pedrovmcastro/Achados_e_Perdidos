@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo    # fuso horário
 from datetime import datetime
 
 from modules.funcionarios import funcionario
-from modules.categorias import categoria, get_categorias
+from modules.categorias import categoria, get_nomes_categorias
 from modules.objetos import objeto, get_objetos_perdidos
 from modules.logon import logon
 
@@ -48,7 +48,7 @@ def jinja_format_datetime(value):
 def index():
     return render_template('index.html',
                            objetos_perdidos=get_objetos_perdidos(),
-                           categorias=get_categorias())
+                           categorias=get_nomes_categorias())
 
 
 @app.route('/admin/')

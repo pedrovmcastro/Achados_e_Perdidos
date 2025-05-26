@@ -12,8 +12,8 @@ categoria_collections = db['categorias']
 categoria = Blueprint("categoria", __name__)
 
 
-def get_categorias():
-    return list(categoria_collections.find())
+def get_nomes_categorias():
+    return [cat['nome'] for cat in categoria_collections.find()]
 
 
 @categoria.route("/admin/categoria")
