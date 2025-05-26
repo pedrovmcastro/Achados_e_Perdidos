@@ -17,15 +17,20 @@ objeto = Blueprint("objeto", __name__)
 
 def get_objetos_perdidos():
     query = {"status": "perdido"}
-    objetos = list(objetos_collections.find(query))
+    objetos = list(objetos_collections.find(query).sort("data_encontrado", -1))
 
-    categorias = {cat['_id']: cat for cat in categorias_collections.find()}
+    objetos_perdidos = []
 
-    for objeto in objetos:
-        cat_id = objeto.get('categoria')
-        objeto['categoria'] = categorias.get(cat_id, {'nome': ''})
-
-    return objetos
+    for obj in objetos:
+        categoria = categorias_collections.find_one({"_id": obj['categoria']})
+        objetos_perdidos.append({
+            'categoria': categoria['nome'],
+            'identificacao': obj['identificacao'],
+            'local_encontrado': obj['local_encontrado'],
+            'data_encontrado': obj['data_encontrado']
+        })
+        
+    return objetos_perdidos
 
 
 @objeto.route("/admin/objeto")
