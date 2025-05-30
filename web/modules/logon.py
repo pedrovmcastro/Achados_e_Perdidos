@@ -28,6 +28,7 @@ def logon_action():
             session['funcionario_id'] = str(funcionario['_id'])
             session['nome'] = funcionario['nome']
             session['administrador'] = funcionario.get('administrador', False)
+            session['logado'] = True
 
             flash("Login com sucesso!", "success")
             return redirect(url_for('admin'))
@@ -41,4 +42,5 @@ def logout():
     session.pop('funcionario_id', None)
     session.pop('nome', None)
     session.pop('administrador', None)
+    session.pop('logado', None)
     return redirect(url_for('login'))

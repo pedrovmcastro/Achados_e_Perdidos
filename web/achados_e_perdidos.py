@@ -50,6 +50,7 @@ def index():
         "id": session.get("funcionario_id", ""),
         "nome": session.get("nome", ""),
         "administrador": session.get("administrador", ""),
+        "logado": session.get("logado", ""),
     }
     return render_template('index.html',
                            objetos_perdidos=get_objetos_perdidos(),
