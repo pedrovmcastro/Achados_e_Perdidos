@@ -46,9 +46,15 @@ def jinja_format_datetime(value):
 # Index #
 @app.route('/')
 def index():
+    sessao = {
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
+    }
     return render_template('index.html',
                            objetos_perdidos=get_objetos_perdidos(),
-                           categorias=get_nomes_categorias())
+                           categorias=get_nomes_categorias(),
+                           sessao=sessao)
 
 
 @app.route('/admin/')

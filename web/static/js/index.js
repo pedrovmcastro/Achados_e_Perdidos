@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-
+    
     const tabela = document.querySelector("#tabela-objetos");
     const headers = tabela.querySelectorAll("thead th");
     const tbody = tabela.querySelector("tbody");
@@ -83,25 +83,45 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Funcão relativa ao formulário de pesquisa
-    
+    // Evento de clique: limpar formulário
+    document.querySelector("#btnLimpar").addEventListener('click', () => {
+        window.location.reload();
+    });
+
+    // Evento de pressionar o Enter = botão de pesquisa
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            pesquisar(objetosJSON, categoriasJSON);
+        }
+    });
+
 });
 
+ // Funcão relativa ao formulário de pesquisa
 function pesquisar(objetos, categorias) {
-    const dataField = document.querySelector('#data_encontrado').value;
-    const categoriaField = document.querySelector('#categoria').value;
-    const identificacaoField = document.querySelector('#identificacao').value;
-    const localField = document.querySelector('#local_encontrado').value;
+    const dataField = document.querySelector('#busca_data_encontrado').value;
+    const categoriaField = document.querySelector('#busca_categoria').value;
+    const identificacaoField = document.querySelector('#busca_identificacao').value;
+    const localField = document.querySelector('#busca_local_encontrado').value;
 
     console.log('Data:', dataField, '\nCategoria:', categoriaField, '\nIdentificação:', identificacaoField, '\nLocal:', localField);
     console.log('Categorias:', categorias);
+
+    console.log(objetos);
 
     const matches = [];
 
     objetos.forEach(objeto => {
         console.log(objeto);
 
-        const matchCategoria = categoriaField !== '' && objeto['categoria'] === categoriaField;
+        // Reaproveitamento de código: função pesquisar é usada tanto em objeto.html quanto index.html
+        const matchCategoria = categoriaField !== '' &&
+        (
+            typeof objeto.categoria === 'object'
+            ? objeto.categoria.nome === categoriaField
+            : objeto.categoria === categoriaField
+        );
+
         const matchIdentificacao = identificacaoField !== '' && objeto['identificacao'] === identificacaoField;
         const matchData = dataField !== '' && objeto['data_encontrado'] === dataField;
         const matchLocal = localField !== '' && objeto['local_encontrado'] === localField;
@@ -120,7 +140,7 @@ function pesquisar(objetos, categorias) {
     matches.forEach(match => {
         const row = document.createElement('tr');
 
-        ['categoria', 'identificacao', 'data_encontrado', 'local_encontrado'].forEach(key => {
+        ['data_encontrado', 'categoria', 'identificacao', 'local_encontrado'].forEach(key => {
             const td = document.createElement('td');
 
             if (key === 'data_encontrado') {
