@@ -25,7 +25,7 @@
           <h1 class="fs-3 text-primary">Achados e Perdidos - Objetos</h1>
           <p class="text-muted">Encontre aqui os itens registrados pela equipe responsável.</p>
         </div>
-        {% if sessao.logado is not None %}
+        {% if sessao.logado %}
           <p>{% if sessao.administrador %}<span class="text-warning">{{ sessao.nome }}</span>{% else %}{{ sessao.nome }}{% endif %} - <a href="/logout">deslogar</a></p>
         {% endif %}
       </header>
