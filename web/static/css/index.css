@@ -38,7 +38,7 @@ sortable:hover {
 }
 
 .sortable::after {
-    content: '';
+    content: '■';
     position: absolute;
     right: 8px;
     top: 50%;
@@ -48,13 +48,13 @@ sortable:hover {
 }
 
 .sortable.asc::after {
-    content: '↑';
+    content: '▲';
     opacity: 1;
     color: #fff;
 }
 
 .sortable.desc::after {
-    content: '↓';
+    content: '▼';
     opacity: 1;
     color: #fff;
 }

@@ -52,6 +52,8 @@ def objeto_index():
 
     for obj in objetos:
         valores = obj.get('campos_valores', {})
+        obj["_id"] = str(obj["_id"])
+        obj["categoria"]["_id"] = str(obj["categoria"]["_id"])
         obj['campos'] = {
             campo: valores.get(campo, '') for campo in obj['categoria'].get('campos', [])
         }

@@ -30,52 +30,16 @@
     </style>
   </head>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const categoriasData = {{ categorias | tojson | safe }};
-      const selectCategoria = document.querySelector('#categoria');
-      const camposContainer = document.querySelector('#camposContainer');
-
-      selectCategoria.addEventListener('change', function () {
-        const categoriaId = this.value;
-        camposContainer.innerHTML = '';
-
-        if (!categoriaId) {
-          camposContainer.style.display = 'none';
-        return;
-        }
-
-        const categoria = categoriasData.find(cat => cat._id === categoriaId);
-
-        if (!categoria || !categoria.campos) {
-          camposContainer.style.display = 'none';
-          return;
-        }
-
-        categoria.campos.forEach(campo => {
-          const div = document.createElement('div');
-          div.className = "mb-3";
-
-          const label = document.createElement('label');
-          label.className = 'form-label';
-          label.innerText = campo;
-          label.setAttribute('for', campo);
-
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'form-control';
-          input.name = `campos_valores[${campo}]`;
-          input.id = campo;
-
-          div.appendChild(label);
-          div.appendChild(input);
-          camposContainer.appendChild(div);
-        });
-
-        camposContainer.style.display = 'block';
-      });
-    });
+    const categoriasData = {{ categorias | tojson | safe }};
   </script>
+
   <body>
+    <!-- Serializando em JSON para enviar ao JS -->
+    <script>
+      const objetosJSON = {{ objetos | tojson | safe}};
+      const categoriasJSON = {{ categorias | tojson |safe }};
+    </script>
+
     <div class="container py-4">
       <header class="mb-4 pb-3 border-bottom d-flex justify-content-between align-items-center">
         <h1 class="fs-3 text-primary">Achados e Perdidos - Objetos</h1>
@@ -160,17 +124,55 @@
             </form>
           </div>
 
+          <!-- Formulário de Pesquisa -->
+          <div class="card p-4 mb-5">
+            <h2 class="fs-5 mb-4">Pesquisar Itens</h2>
+            <form>
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Data Encontrado</label>
+                  <input type="date" class="form-control" id="busca_data_encontrado" name="data_encontrado"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Categoria</label>
+                  <select class="form-select" id="busca_categoria" name="categoria">
+                    <option value="">Selecione uma categoria</option>
+                    {% for cat in categorias %}
+                      <option>{{ cat.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Identificação</label>
+                  <input type="text" class="form-control" id="busca_identificacao" name="identificacao"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Local Encontrado</label>
+                  <input type="text" class="form-control" id="busca_local_encontrado" name="local_encontrado" />
+                </div>
+              </div>
+              <div class="row g-3 mt-3">
+                <div class="col-md-3">
+                  <button type="button" class="btn btn-primary w-100" id="btnPesquisar" onclick="pesquisar(objetosJSON, categoriasJSON)">Pesquisar</button>
+                </div>
+                <div class="col-md-3">
+                  <button type="reset" class="btn btn-outline-secondary w-100" id="btnLimpar">Limpar</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
           <div class="row g-5">
             <!-- Tabela -->
             <h3 class="mb-3">Listagem de Objetos</h3>
             {% if objetos %}
             <div class="table-responsive">
-              <table class="table table-striped table-hover align-middle">
+              <table class="table table-striped table-hover align-middle" id="tabela-objetos">
                 <thead class="table-dark">
                   <tr>
-                    <th>Categoria</th>
-                    <th>Descrição</th>
                     <th>Data</th>
+                    <th>Categoria</th>
+                    <th>Identificação</th>
                     <th>Local</th>
                     <th></th>
                     <th></th>
@@ -179,9 +181,9 @@
                 <tbody>
                   {% for objeto in objetos %}
                     <tr>
-                      <td>{{ objeto.categoria.nome }}</td>
-                      <td>{{ objeto.descricao }}</td>
                       <td>{{ objeto.data_encontrado }}</td>
+                      <td>{{ objeto.categoria.nome }}</td>
+                      <td>{{ objeto.identificacao }}</td>
                       <td>{{ objeto.local_encontrado }}</td>
                       <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a>
                       <td>{% if sessao.administrador %}<a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a>{% endif %}</td>
@@ -199,5 +201,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script srt="{{ url_for('static', filename='js/objeto.js')}}"></script>
   </body>
 </html>
