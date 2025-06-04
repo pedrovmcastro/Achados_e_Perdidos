@@ -1,7 +1,7 @@
 from flask import Flask, render_template, session
 
-from decorators import login_required
-from zoneinfo import ZoneInfo    # fuso horário
+from decorators import login_required, session_expired
+from zoneinfo import ZoneInfo
 from datetime import datetime
 
 from modules.funcionarios import funcionario
@@ -60,6 +60,7 @@ def index():
 
 @app.route('/admin/')
 @login_required
+@session_expired
 def admin():
     sessao = {
         "id": session.get("funcionario_id", ""),

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
-from decorators import login_required, admin_required
+from decorators import login_required, admin_required, session_expired
 import secret
 import pymongo
 from datetime import datetime, timezone
@@ -18,6 +18,7 @@ def get_nomes_categorias():
 
 @categoria.route("/admin/categoria")
 @login_required
+@session_expired
 def categoria_index():
     categorias = []
     for c in categoria_collections.find():
@@ -39,9 +40,9 @@ def categoria_index():
 
 @categoria.route("/admin/categoria/add", methods=["POST"])
 @login_required
+@session_expired
 def categoria_add():
     nome = request.form.get("nome")
-
     campos = request.form.getlist('campos[]')
 
     if nome and campos:
@@ -51,12 +52,21 @@ def categoria_add():
         })
         flash("Cadastrado com sucesso!", "success")
     else:
-        flash("Alguma coisa deu errado!", "danger")
+        vazios = []
+        if not nome:
+            vazios.append("nome")
+        if not campos:
+            vazios.append("campos")
+
+        plural = 's' if len(vazios) > 1 else ''
+        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
 
     return redirect(url_for(".categoria_index"))
 
+
 @categoria.route("/admin/categoria/edit/<string:categoria_id>")
 @login_required
+@session_expired
 def categoria_edit(categoria_id):
     sessao = {
         "id": session.get("funcionario_id", ""),
@@ -72,21 +82,29 @@ def categoria_edit(categoria_id):
 
 @categoria.route("/admin/categoria/edit/<string:categoria_id>/form", methods=["POST"])
 @login_required
+@session_expired
 def categoria_edit_action(categoria_id):
-    
+
     # Coletar dados do formulário
     nome = request.form.get("nome")
     campos = request.form.getlist('campos[]')
 
-    campos = [c.strip() for c in campos if c.strip()]  # remove vazios e espaços
-    campos = list(dict.fromkeys(campos))  # remove duplicatas
+    campos = [c.strip() for c in campos if c.strip()]
+    campos = list(dict.fromkeys(campos))
 
     # Validação server-side
     if not nome or not campos:
-        flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
+        vazios = []
+        if not nome:
+            vazios.append("nome")
+        if not campos:
+            vazios.append("campos")
+
+        plural = 's' if len(vazios) > 1 else ''
+        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
         return redirect(url_for(".categoria_edit", categoria_id=categoria_id))
 
-     # Preparar dados para atualização
+    # Preparar dados para atualização
     update_data = {
         "nome": nome,
         "campos": campos,
@@ -103,7 +121,7 @@ def categoria_edit_action(categoria_id):
             flash("Categoria atualizada com sucesso!", "success")
         else:
             flash("Nenhuma alteração foi detectada.", "warning")
-            
+
     except Exception as e:
         print(f"Erro na atualização: {e}")
         flash("Erro crítico na atualização da categoria!", "danger")
@@ -111,19 +129,22 @@ def categoria_edit_action(categoria_id):
     return redirect(url_for(".categoria_index"))
 
 
+'''
 @categoria.route("/admin/categoria/delete/<string:categoria_id>")
 @login_required
 def categoria_delete(categoria_id):
     categoria_collections.delete_one({"_id": ObjectId(categoria_id)})
     return redirect(url_for(".categoria_index"))
+'''
 
 
 @categoria.route("/api/categoria/<id>")
 @login_required
+@session_expired
 def get_categoria(id):
     categoria = categoria_collections.find_one({"_id": ObjectId(id)})
     if not categoria:
-       flash("Categoria não encontrada", "danger")
+        flash("Categoria não encontrada", "danger")
     return jsonify({
         "_id": str(categoria["_id"]),
         "nome": categoria["nome"],
