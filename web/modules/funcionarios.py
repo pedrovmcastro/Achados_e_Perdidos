@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
-from decorators import login_required, admin_required
+from decorators import login_required, admin_required, session_expired
 import secret
 import pymongo
 import hashlib
@@ -15,6 +15,7 @@ funcionario = Blueprint("funcionario", __name__)
 
 @funcionario.route("/admin/funcionario")
 @login_required
+@session_expired
 def funcionario_index():
     sessao = {
         "id": session.get("funcionario_id", ""),
@@ -47,6 +48,7 @@ def funcionario_index():
 
 @funcionario.route("/admin/funcionario/add", methods=["POST"])
 @login_required
+@session_expired
 @admin_required
 def funcionario_add():
     nome = request.form.get("nome")
@@ -78,13 +80,27 @@ def funcionario_add():
         })
         flash("Cadastrado com sucesso!", "success")
     else:
-        flash("Alguma coisa deu errado!", "danger")
+        vazios = []
+        if not nome:
+            vazios.append("nome")
+        if not matricula:
+            vazios.append("campos")
+        if not senha:
+            vazios.append("senha")
+        if not rua:
+            vazios.append("rua")
+        if not cep:
+            vazios.append("cep")
+
+        plural = 's' if len(vazios) > 1 else ''
+        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
 
     return redirect(url_for(".funcionario_index"))
 
 
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>")
 @login_required
+@session_expired
 def funcionario_edit(funcionario_id):
     if funcionario_id == '682e4ad7c6002bc2c0163de8':
         flash("Não pode editar o Admin!", "danger")
@@ -104,6 +120,7 @@ def funcionario_edit(funcionario_id):
 
 @funcionario.route("/admin/funcionario/edit/<string:funcionario_id>/form", methods=["POST"])
 @login_required
+@session_expired
 def funcionario_edit_action(funcionario_id):
     # Coletar dados do formulário
     nome = request.form.get("nome")
@@ -119,7 +136,20 @@ def funcionario_edit_action(funcionario_id):
 
     # Validação server-side
     if not all([nome, matricula, rua, cep]):
-        flash("Todos os campos obrigatórios devem ser preenchidos!", "danger")
+        vazios = []
+        if not nome:
+            vazios.append("nome")
+        if not matricula:
+            vazios.append("campos")
+        if not senha:
+            vazios.append("senha")
+        if not rua:
+            vazios.append("rua")
+        if not cep:
+            vazios.append("cep")
+
+        plural = 's' if len(vazios) > 1 else ''
+        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
         return redirect(url_for(".funcionario_edit", funcionario_id=funcionario_id))
 
     # Preparar dados para atualização
@@ -150,7 +180,6 @@ def funcionario_edit_action(funcionario_id):
             flash("Nenhuma alteração foi detectada.", "warning")
 
     except Exception as e:
-        print(f"Erro na atualização: {e}")
         flash("Erro crítico na atualização do funcionário!", "danger")
 
     return redirect(url_for(".funcionario_index"))
@@ -158,6 +187,7 @@ def funcionario_edit_action(funcionario_id):
 
 @funcionario.route("/admin/funcionario/<string:funcionario_id>/desligar")
 @login_required
+@session_expired
 def funcionario_desligar(funcionario_id):
     if funcionario_id == '682e4ad7c6002bc2c0163de8':
         flash("Não pode editar o Admin!", "danger")
@@ -176,6 +206,7 @@ def funcionario_desligar(funcionario_id):
 
 @funcionario.route("/admin/funcionario/<string:funcionario_id>/religar")
 @login_required
+@session_expired
 def funcionario_religar(funcionario_id):
 
     funcionarios_collections.update_one(

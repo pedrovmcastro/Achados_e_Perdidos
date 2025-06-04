@@ -1,11 +1,11 @@
 from flask import Flask, render_template, session
 
-from decorators import login_required
-from zoneinfo import ZoneInfo    # fuso horário
+from decorators import login_required, session_expired
+from zoneinfo import ZoneInfo
 from datetime import datetime
 
 from modules.funcionarios import funcionario
-from modules.categorias import categoria, get_categorias
+from modules.categorias import categoria, get_nomes_categorias
 from modules.objetos import objeto, get_objetos_perdidos
 from modules.logon import logon
 
@@ -46,13 +46,21 @@ def jinja_format_datetime(value):
 # Index #
 @app.route('/')
 def index():
+    sessao = {
+        "id": session.get("funcionario_id", ""),
+        "nome": session.get("nome", ""),
+        "administrador": session.get("administrador", ""),
+        "logado": session.get("logado", ""),
+    }
     return render_template('index.html',
                            objetos_perdidos=get_objetos_perdidos(),
-                           categorias=get_categorias())
+                           categorias=get_nomes_categorias(),
+                           sessao=sessao)
 
 
 @app.route('/admin/')
 @login_required
+@session_expired
 def admin():
     sessao = {
         "id": session.get("funcionario_id", ""),

@@ -4,7 +4,7 @@ import secret
 import pymongo
 import hashlib
 from datetime import timezone
-
+from time import time
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
@@ -28,6 +28,7 @@ def logon_action():
             session['funcionario_id'] = str(funcionario['_id'])
             session['nome'] = funcionario['nome']
             session['administrador'] = funcionario.get('administrador', False)
+            session['logado'] = int(time())
 
             flash("Login com sucesso!", "success")
             return redirect(url_for('admin'))
@@ -41,4 +42,5 @@ def logout():
     session.pop('funcionario_id', None)
     session.pop('nome', None)
     session.pop('administrador', None)
+    session.pop('logado', None)
     return redirect(url_for('login'))
