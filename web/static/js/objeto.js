@@ -1,43 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
-      const selectCategoria = document.querySelector('#categoria');
-      const camposContainer = document.querySelector('#camposContainer');
+    const categoria = document.querySelector('#categoria');
 
-      selectCategoria.addEventListener('change', function () {
-        const categoriaId = this.value;
-        camposContainer.innerHTML = '';
+    categoria.addEventListener('change', function () {
+        const categoriaId = this.value
 
-        if (!categoriaId) {
-          camposContainer.style.display = 'none';
-        return;
+        if (categoria.length) {
+            fetch(`_get_campos/${categoriaId}`, {mode: 'cors'})
+            .then(response => response.json())
+            .then(data => {
+                const campos = document.querySelector('#campos');
+                campos.innerHTML = '';
+                let row = null;
+
+                for (i = 0; i < data.campos.length; i++) {
+                    item = data.campos[i]
+
+                    if (i === 0) {
+                        row = document.createElement('div')
+                        row.classList.add('row');
+                    } else if (i % 3 === 0) {
+                        campos.appendChild(row);
+                        row = document.createElement('div');
+                        row.classList.add('row');
+                    }
+
+                    const col = document.createElement('div');
+                    col.classList.add('col-md-4', 'mb-3');
+
+                    const label = document.createElement('label');
+                    label.setAttribute('for', item);
+                    label.classList.add('form-label');
+                    label.textContent = item;
+                    col.appendChild(label)
+
+                    const input = document.createElement('input');
+                    input.setAttribute('type', 'text');
+                    input.classList.add('form-control');
+                    input.setAttribute('id', item);
+                    input.setAttribute('name', `campos_valores[${item}]item`);
+                    col.appendChild(input)
+
+                    row.appendChild(col);
+                }
+
+                campos.appendChild(row);
+            });
         }
+    })
+});
 
-        const categoria = categoriasData.find(cat => cat._id === categoriaId);
-
-        if (!categoria || !categoria.campos) {
-          camposContainer.style.display = 'none';
-          return;
-        }
-
-        categoria.campos.forEach(campo => {
-          const div = document.createElement('div');
-          div.className = "mb-3";
-
-          const label = document.createElement('label');
-          label.className = 'form-label';
-          label.innerText = campo;
-          label.setAttribute('for', campo);
-
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'form-control';
-          input.name = `campos_valores[${campo}]`;
-          input.id = campo;
-
-          div.appendChild(label);
-          div.appendChild(input);
-          camposContainer.appendChild(div);
-        });
-
-        camposContainer.style.display = 'block';
-      });
-    });

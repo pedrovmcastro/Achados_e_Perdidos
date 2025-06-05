@@ -3,9 +3,10 @@ from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
 from decorators import login_required, admin_required, session_expired
 from upload import salvar_arquivo
+from datetime import datetime, timezone
 import secret
 import pymongo
-from datetime import datetime, timezone
+
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
@@ -58,13 +59,10 @@ def objeto_index():
             campo: valores.get(campo, '') for campo in obj['categoria'].get('campos', [])
         }
 
-    # Busca todas as categorias do banco
     categorias = list(db.categorias.find())
 
-    # Converta os ObjectId em strings para evitar erro no `tojson`
     for cat in categorias:
-        if isinstance(cat["_id"], ObjectId):
-            cat["_id"] = str(cat["_id"])
+        cat["_id"] = str(cat["_id"])
         cat["campos"] = cat.get("campos", [])
     sessao = {
         "id": session.get("funcionario_id", ""),

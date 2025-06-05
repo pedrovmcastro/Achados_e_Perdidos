@@ -58,6 +58,10 @@ def funcionario_add():
     rua = request.form.get("rua")
     cep = request.form.get("cep")
 
+    if len(cep) < 9:
+        flash("Formato do CEP inválido!", "danger")
+        return redirect(url_for(".funcionario_index"))
+
     if nome and matricula and senha and rua and cep:
         funcionario = funcionarios_collections.find_one({
             "matricula": matricula,
@@ -179,7 +183,7 @@ def funcionario_edit_action(funcionario_id):
         else:
             flash("Nenhuma alteração foi detectada.", "warning")
 
-    except Exception as e:
+    except Exception:
         flash("Erro crítico na atualização do funcionário!", "danger")
 
     return redirect(url_for(".funcionario_index"))

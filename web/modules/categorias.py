@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
 from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
-from decorators import login_required, admin_required, session_expired
+from decorators import login_required, session_expired
+from datetime import datetime, timezone
 import secret
 import pymongo
-from datetime import datetime, timezone
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
@@ -138,15 +138,27 @@ def categoria_delete(categoria_id):
 '''
 
 
-@categoria.route("/api/categoria/<id>")
+@categoria.route("/api/categoria/<categoria_id>")
 @login_required
 @session_expired
-def get_categoria(id):
-    categoria = categoria_collections.find_one({"_id": ObjectId(id)})
+def get_categoria(categoria_id):
+    categoria = categoria_collections.find_one({"_id": ObjectId(categoria_id)})
+
     if not categoria:
         flash("Categoria não encontrada", "danger")
     return jsonify({
         "_id": str(categoria["_id"]),
         "nome": categoria["nome"],
         "campos": categoria["campos"]
+    })
+
+
+@categoria.route("/admin/_get_campos/<categoria_id>", methods=["GET"])
+def get_campos(categoria_id):
+    categoria = categoria_collections.find_one(
+        {"_id": ObjectId(categoria_id)}
+    )
+
+    return jsonify({
+        "campos": categoria.get("campos")
     })
