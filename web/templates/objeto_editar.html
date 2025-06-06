@@ -108,10 +108,9 @@ body {
 
                         <!-- Seção Categoria -->
                         <h5 class="mb-3 mt-4">Categoria<span class="text-danger">*</span></h5>
-                        <div class="mb-3">
-                            <select class="form-select" id="categoria" disabled>
-                                <option value="{{ objeto.categoria.nome }}" selected>{{ objeto.categoria.nome }}</option>
-                            </select>
+                        <input type="hidden" value="{{ objeto.categoria._id }}"  id="categoria" name="categoria">
+                        <div class="mb-3 ">
+                            <p class="border border-secundary-subtle rounded p-2">{{ objeto.categoria.nome }}</p>
                         </div>
 
                         <!-- Seção Campos -->
@@ -145,7 +144,7 @@ body {
                             <h5 class="mb-3 mt-2">Resolução</h5>
                             <div class="mb-4">
                                 <label for="resolucao" class="form-label">Descrição da Resolução<span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="resolucao" rows="2" placeholder="Ex: Objeto entregue ao proprietário mediante apresentação de documento." name="resolucao">{{ objeto.resolucao | trim }}</textarea>
+                                <textarea class="form-control" id="resolucao" rows="2" placeholder="Ex: Objeto entregue ao proprietário mediante apresentação de documento." name="resolucao">{{ objeto.resolucao }}</textarea>
                             </div>
 
                             <!-- Seção Destinatário -->

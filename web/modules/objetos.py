@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from bson.objectid import ObjectId
 from bson.codec_options import CodecOptions
-from decorators import login_required, admin_required, session_expired
-from upload import salvar_arquivo
+from bson.objectid import ObjectId
 from datetime import datetime, timezone
-import secret
+from decorators import login_required, session_expired, admin_required
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from upload import salvar_arquivo
 import pymongo
+import secret
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
@@ -214,6 +214,9 @@ def objeto_edit_action(objeto_id):
     destinatario_documento = request.form.get('destinatario_documento')
     destinatario_contato = request.form.get('destinatario_contato')
     remover_imagem = request.form.get('removerImagem')
+
+    categoria_id = request.form.get('categoria', None)
+    categoria = db.categorias.find_one({'_id': ObjectId(categoria_id)})
 
     if not data_encontrado:
         flash('Data encontrada inválida!', 'danger')
