@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`_get_campos/${categoriaId}`, {mode: 'cors'})
             .then(response => response.json())
             .then(data => {
+                console.log(data)
                 const campos = document.querySelector('#campos');
                 campos.innerHTML = '';
                 let row = null;
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     input.setAttribute('type', 'text');
                     input.classList.add('form-control');
                     input.setAttribute('id', item);
-                    input.setAttribute('name', `campos_valores[${item}]item`);
+                    input.setAttribute('name', `campos[${item}]item`);
                     col.appendChild(input)
 
                     row.appendChild(col);
@@ -87,7 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>{% if sessao.administrador %}<span class="text-warning">{{ sessao.nome }}</span>{% else %}{{ sessao.nome }}{% endif %} - <a href="/logout">deslogar</a></p>
         </header>
 
-        {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
         <div id="flashes">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
@@ -96,7 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             {% endfor %}
         </div>
-        {% endif %} {% endwith %}
+        {% endif %}
+        {% endwith %}
 
         <div class="row g-5">
             <!-- Menu Lateral -->
@@ -110,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <!-- Conteúdo Principal -->
             <div class="col-md-9">
-                <h3 class="mb-3">Cadastrar Objeto</h3>
+                <h3 class="mb-3">Novo Objeto</h3>
                 <div class="card p-4 mb-5">
                     <form action="/admin/objeto/add" method="post" enctype="multipart/form-data">
                         <p class="text-danger fw-bold">Campos marcados por * são obrigatorios!</p>
@@ -133,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="data_encontrado" class="form-label">Data Encontrado<span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="data_encontrado" name="data_encontrado" required />
+                                <input type="date" class="form-control" id="data_encontrado" name="data_encontrado" max="{{ hoje }}" required />
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -142,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
 
-                        <h5 class="mb-3 mt-4">Categoria</h5>
+                        <h5 class="mb-3 mt-4">Categoria<span class="text-danger">*</span></h5>
 
                         <div class="mb-3">
                             <select class="form-select" id="categoria" name="categoria">
@@ -174,21 +177,24 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label">Data Encontrado</label>
-                                    <input type="date" class="form-control" id="busca_data_encontrado" name="data_encontrado" />
+                                    <input type="date" class="form-control" id="busca_data_encontrado" name="data_encontrado"  max="{{ hoje }}" />
                                 </div>
+
                                 <div class="col-md-3">
                                     <label class="form-label">Categoria</label>
                                     <select class="form-select" id="busca_categoria" name="categoria">
-                                        <option value="">Selecione uma categoria</option>
+                                        <option value="0">Nenhuma</option>
                                         {% for categoria in categorias %}
-                                        <option>{{ categoria.nome }}</option>
+                                        <option>{{ categoria }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
+
                                 <div class="col-md-3">
                                     <label class="form-label">Identificação</label>
                                     <input type="text" class="form-control" id="busca_identificacao" name="identificacao" />
                                 </div>
+
                                 <div class="col-md-3">
                                     <label class="form-label">Local Encontrado</label>
                                     <input type="text" class="form-control" id="busca_local_encontrado" name="local_encontrado" />
@@ -229,10 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <td>{{ objeto.identificacao }}</td>
                                     <td>{{ objeto.local_encontrado }}</td>
                                     <td>{{ objeto.status|capitalize }}</td>
-                                    <td>
-                                        <a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a>
-                                        {% if sessao.administrador %}<a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a>{% endif %}
-                                    </td>
+                                    <td><a class="btn btn-sm btn-outline-primary" href="/admin/objeto/edit/{{ objeto._id }}">Editar</a>{% if sessao.administrador %} <a class="btn btn-sm btn-outline-danger" href="/admin/objeto/{{ objeto._id }}/delete">Deletar</a>{% endif %}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

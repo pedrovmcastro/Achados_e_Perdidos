@@ -140,10 +140,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         <tr>
                             <td>{{ categoria.nome }}</td>
                             <td>{{ categoria.get('campos')|join(", ") }}</td>
-                            <td>
-                                <a class="btn btn-sm btn-outline-primary" href="/admin/categoria/edit/{{ categoria._id }}">Editar</a>
-                                {% if sessao.administrador %}<a class="btn btn-sm btn-outline-danger" href="/admin/categoria/delete/{{ categoria._id }}" onclick="return confirm('Tem certeza que deseja apagar esta categoria?')">Deletar</a>{% endif %}
-                            </td>
+                            <td><a class="btn btn-sm btn-outline-primary" href="/admin/categoria/edit/{{ categoria._id }}">Editar</a>{% if sessao.administrador %} <a class="btn btn-sm btn-outline-danger" href="/admin/categoria/delete/{{ categoria._id }}" onclick="return confirm('Tem certeza que deseja apagar esta categoria?')">Deletar</a>{% endif %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -59,10 +59,9 @@ body {
 
             <!-- Coluna do formulário -->
             <div class="col-md-9">
-                <h3 class="mb-4">Editar Objeto</h3>
+                <h3 class="mb-3">Editar Objeto</h3>
                 <div class="card p-4">
                     <p class="text-danger fw-bold">Campos marcados por * são obrigatorios!</p>
-
                     <!-- Formulário de edição de objeto -->
                     <form action="/admin/objeto/edit/{{ objeto._id }}/form" method="post" enctype="multipart/form-data">
                         <!-- Seção Descrição -->
@@ -98,7 +97,7 @@ body {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="dataEncontrado" class="form-label">Data Encontrado<span class="text-danger">*</span></label>
-                                <input type="date" class="form-control" id="dataEncontrado" name="data_encontrado" value="{{ objeto.data_encontrado }}">
+                                <input type="date" class="form-control" id="dataEncontrado" name="data_encontrado" max={{ hoje }} value="{{ objeto.data_encontrado }}">
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -108,7 +107,7 @@ body {
                         </div>
 
                         <!-- Seção Categoria -->
-                        <h5 class="mb-3 mt-4">Categoria</h5>
+                        <h5 class="mb-3 mt-4">Categoria<span class="text-danger">*</span></h5>
                         <div class="mb-3">
                             <select class="form-select" id="categoria" disabled>
                                 <option value="{{ objeto.categoria.nome }}" selected>{{ objeto.categoria.nome }}</option>
@@ -117,14 +116,16 @@ body {
 
                         <!-- Seção Campos -->
                         <div id="campos">
+                            {% for row in objeto.campos_valores.items()|batch(3) %}
                             <div class="row">
-                                {% for campo, valor in objeto.campos_valores.items() %}
+                                {% for campo, valor in row %}
                                 <div class="col-md-4 mb-3">
-                                    <label for="{{ campo }}" class="form-label"><strong>{{ campo }}</strong></label>
-                                    <input type="text" class="form-control" id="campo[{{ valor }}]" name="campos_valores[{{ campo }}]" value="{{ valor }}">
+                                    <label for="{{ campo }}" class="form-label">{{ campo }}</label>
+                                    <input type="text" class="form-control" id="campos[{{ valor }}]" name="campo[{{ campo }}]" value="{{ valor }}">
                                 </div>
                                 {% endfor %}
                             </div>
+                            {% endfor %}
                         </div>
 
                         <!-- Seção Status -->

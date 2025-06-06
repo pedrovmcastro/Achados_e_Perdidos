@@ -156,7 +156,6 @@ def get_categoria(categoria_id):
     })
 
 
-#????????????????
 @categoria.route('/admin/_get_campos/<categoria_id>', methods=['GET'])
 @login_required
 @session_expired

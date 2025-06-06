@@ -60,9 +60,14 @@ def funcionario_add():
     rua = request.form.get('rua')
     cep = request.form.get('cep')
 
+    if not matricula.isdigit():
+        flash('Matricula tem que ser um número!', 'danger')
+        return redirect(url_for('.funcionario_index'))
+
     funcionario = funcionarios_collections.find_one({
         'matricula': matricula,
     })
+
     if funcionario:
         flash('Matricula tem que ser única!', 'danger')
         return redirect(url_for('.funcionario_index'))
@@ -71,12 +76,10 @@ def funcionario_add():
         flash('Formato do CEP inválido!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
-    if not all([nome, matricula, senha, rua]):
+    if not all([nome, senha, rua]):
         vazios = []
         if not nome:
             vazios.append('Nome')
-        if not matricula:
-            vazios.append('Matrícula')
         if not senha:
             vazios.append('Senha')
         if not rua:
@@ -191,7 +194,6 @@ def funcionario_edit_action(funcionario_id):
             flash('Funcionário atualizado com sucesso!', 'success')
         else:
             flash('Nenhuma alteração foi detectada.', 'warning')
-
     except Exception:
         flash('Erro crítico na atualização do funcionário!', 'danger')
 

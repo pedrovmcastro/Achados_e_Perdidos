@@ -12,18 +12,27 @@ db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware
 objetos_collections = db['objetos']
 categorias_collections = db['categorias']
 
-objeto = Blueprint("objeto", __name__)
+objeto = Blueprint('objeto', __name__)
+
+
+# Função auxiliar
+def data_valida(s):
+    try:
+        datetime.strptime(s, r'%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 
 #  ??????
 def get_objetos_perdidos():
-    query = {"status": "perdido"}
-    objetos = list(objetos_collections.find(query).sort("data_encontrado", -1))
+    query = {'status': 'perdido'}
+    objetos = list(objetos_collections.find(query).sort('data_encontrado', -1))
 
     objetos_perdidos = []
 
     for obj in objetos:
-        categoria = categorias_collections.find_one({"_id": obj['categoria']})
+        categoria = categorias_collections.find_one({'_id': obj['categoria']})
         objetos_perdidos.append({
             'categoria': categoria['nome'],
             'identificacao': obj['identificacao'],
@@ -34,41 +43,75 @@ def get_objetos_perdidos():
     return objetos_perdidos
 
 
-@objeto.route("/admin/objeto")
+@objeto.route('/admin/objeto')
 @login_required
 @session_expired
 def objeto_index():
     categorias = categorias_collections.find()
-    objetos = objetos_collections.find()
+    objetos = list(objetos_collections.aggregate([
+        {
+            '$lookup':  {
+                'from': 'categorias',
+                'localField': 'categoria',
+                'foreignField': '_id',
+                'as': 'categoria'
+            }
+        },
+        {
+            '$unwind': '$categoria'
+        }
+    ]))
+
+    hoje = datetime.now().strftime(r'%Y-%m-%d')
 
     sessao = {
-        "id": session.get("funcionario_id", ""),
-        "nome": session.get("nome", ""),
-        "administrador": session.get("administrador", ""),
+        'id': session.get('funcionario_id', ''),
+        'nome': session.get('nome', ''),
+        'administrador': session.get('administrador', ''),
     }
 
-    return render_template("objeto.html",
+    return render_template('objeto.html',
                            objetos=objetos,
                            categorias=categorias,
+                           hoje=hoje,
                            sessao=sessao,
                            )
 
 
-@objeto.route("/admin/objeto/add", methods=["POST"])
+@objeto.route('/admin/objeto/add', methods=['POST'])
 @login_required
 @session_expired
 def objeto_add():
-    categoria_id = request.form.get("categoria", None)
+    descricao = request.form.get('descricao')
+    data_encontrado = request.form.get('data_encontrado')
+    local_encontrado = request.form.get('local_encontrado')
+    identificacao = request.form.get('identificacao')
+    categoria_id = request.form.get('categoria', None)
 
     if not categoria_id:
-        flash("Não tem o como pegar a categoria!", "danger")
-        return redirect(url_for(".objeto_index"))
+        flash('Categoria inválida!', 'danger')
+        return redirect(url_for('.objeto_index'))
 
-    categoria = db.categorias.find_one({"_id": ObjectId(categoria_id)})
+    categoria = db.categorias.find_one({'_id': ObjectId(categoria_id)})
 
     if not categoria:
-        flash("Categoria inválida!", "danger")
-        return redirect(url_for(".objeto_index"))
+        flash('Categoria inválida!', 'danger')
+        return redirect(url_for('.objeto_index'))
+
+    if not data_encontrado:
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_index'))
+
+    if not data_valida(data_encontrado):
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_index'))
+
+    hoje = datetime.now()
+    encontrada = datetime.strptime(data_encontrado, r'%Y-%m-%d')
+
+    if encontrada > hoje:
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_index'))
 
     caminho_da_imagem = None
     if 'imagem' in request.files:
@@ -80,136 +123,112 @@ def objeto_add():
             if not caminho_da_imagem:
                 flash('Tipo de arquivo da imagem não permitido ou falha ao salvar.', 'danger')
 
-    # Dados fixos
-    descricao = request.form.get("descricao")
-    data_encontrado = request.form.get('data_encontrado')
-    local_encontrado = request.form.get('local_encontrado')
-    identificacao = request.form.get('identificacao')
-
-    # Extrair campos dinâmicos de acordo com a categoria
-    valores_campos = {}
-    for campo in categoria.get('campos', []):
-        # o nome do campo no form é 'campos_valores[<campo>]'
-        valor = request.form.get(f"campos_valores[{campo}]")
-        if valor is not None:
-            valores_campos[campo] = valor
-
-    # Monta o documento para inserir
-    if descricao and data_encontrado and local_encontrado:
-        objetos_collections.insert_one({
-            "descricao": descricao,
-            "imagem": caminho_da_imagem,
-            "categoria": ObjectId(categoria_id),
-            "data_insercao": datetime.now(timezone.utc),
-            "data_encontrado": data_encontrado,
-            "identificacao": identificacao,
-            "local_encontrado": local_encontrado,
-            "campos_valores": valores_campos,
-            "resolvido": False,
-            "status": "perdido"
-        })
-        flash("Cadastrado com sucesso!", "success")
-    else:
+    if not all([descricao, local_encontrado]):
         vazios = []
         if not descricao:
-            vazios.append("descrição")
-        if not data_encontrado:
-            vazios.append("Data Encontrado")
+            vazios.append('Descrição')
         if not local_encontrado:
-            vazios.append("Local Encontrado")
+            vazios.append('Local encontrado')
+
         plural = 's' if len(vazios) > 1 else ''
-        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
+        flash(f'Campo{plural} não preenchido{plural}: {', '.join(vazios)}!', 'danger')
+        return redirect(url_for('.categoria_index'))
 
-        flash("Alguma coisa deu errado!", "danger")
+    campos = {campo: request.form.get(f'campos[{campo}]', '') for campo in categoria.get('campos', [])}
 
-    return redirect(url_for(".objeto_index"))
+    new_data = {
+        'descricao': descricao,
+        'imagem': caminho_da_imagem,
+        'categoria': ObjectId(categoria_id),
+        'data_insercao': datetime.now(timezone.utc),
+        'data_encontrado': data_encontrado,
+        'identificacao': identificacao,
+        'local_encontrado': local_encontrado,
+        'campos_valores': campos,
+        'resolvido': False,
+        'status': 'perdido'
+    }
+
+    try:
+        result = objetos_collections.insert_one(new_data)
+
+        if result.inserted_id:
+            flash('Objeto adicionada com sucesso!', 'success')
+        else:
+            flash('Erro ao adicionar objeto.', 'danger')
+    except Exception:
+        flash('Erro crítico ao adicionar a objeto!', 'danger')
+
+    return redirect(url_for('.objeto_index'))
 
 
-@objeto.route("/admin/objeto/edit/<string:objeto_id>")
+@objeto.route('/admin/objeto/edit/<string:objeto_id>')
 @login_required
 @session_expired
 def objeto_edit(objeto_id):
-    pipeline = [
-        {"$match": {"_id": ObjectId(objeto_id)}},
+    objeto = list(objetos_collections.aggregate([
+        {'$match': {'_id': ObjectId(objeto_id)}},
         {
-            "$lookup": {
-                "from": "categorias",
-                "localField": "categoria",
-                "foreignField": "_id",
-                "as": "categoria"
+            '$lookup':  {
+                'from': 'categorias',
+                'localField': 'categoria',
+                'foreignField': '_id',
+                'as': 'categoria'
             }
         },
-        {"$unwind": "$categoria"},
-        {"$sort": {"data_encontrado": -1}}
-    ]
-    resultado = list(db.objetos.aggregate(pipeline))
-    objeto = resultado[0]
+        {
+            '$unwind': '$categoria'
+        },
+        {'$limit': 1},
+    ]))[0]
+
+    hoje = datetime.now().strftime(r'%Y-%m-%d')
+
     sessao = {
-        "id": session.get("funcionario_id", ""),
-        "nome": session.get("nome", ""),
-        "administrador": session.get("administrador", ""),
+        'id': session.get('funcionario_id', ''),
+        'nome': session.get('nome', ''),
+        'administrador': session.get('administrador', ''),
     }
-    return render_template("objeto_editar.html",
+
+    return render_template('objeto_editar.html',
                            objeto=objeto,
+                           hoje=hoje,
                            sessao=sessao,
                            )
 
 
-@objeto.route("/admin/objeto/edit/<string:objeto_id>/form", methods=["POST"])
+@objeto.route('/admin/objeto/edit/<string:objeto_id>/form', methods=['POST'])
 @login_required
 @session_expired
 def objeto_edit_action(objeto_id):
-    descricao = request.form.get("descricao")
+    objeto = db.objetos.find_one({"_id": ObjectId(objeto_id)})
+
+    descricao = request.form.get('descricao')
     data_encontrado = request.form.get('data_encontrado')
     local_encontrado = request.form.get('local_encontrado')
-    identificacao = request.form.get("identificacao")
-    resolvido = request.form.get("resolvido")
-    status = request.form.get("status")
-    resolucao = request.form.get("resolucao")
-    destinatario_nome = request.form.get("destinatario_nome")
-    destinatario_documento = request.form.get("destinatario_documento")
-    destinatario_contato = request.form.get("destinatario_contato")
-    remover_imagem = request.form.get("removerImagem")
+    identificacao = request.form.get('identificacao')
+    resolvido = request.form.get('resolvido')
+    status = request.form.get('status')
+    resolucao = request.form.get('resolucao')
+    destinatario_nome = request.form.get('destinatario_nome')
+    destinatario_documento = request.form.get('destinatario_documento')
+    destinatario_contato = request.form.get('destinatario_contato')
+    remover_imagem = request.form.get('removerImagem')
 
-    if not status:
-        flash(f"Status não pode ser vazio!", "danger")
-        return redirect(url_for(".objeto_edit", objeto_id=objeto_id))
+    if not data_encontrado:
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
-    valido = 1
-    if not all([descricao, data_encontrado, local_encontrado]):
-        vazios = []
-        if not descricao:
-            vazios.append("Descrição")
-        if not data_encontrado:
-            vazios.append("Data encontrado")
-        if not local_encontrado:
-            vazios.append("Local encontrado")
-        if not status:
-            vazios.append("Local encontrado")
+    if not data_valida(data_encontrado):
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
-        plural = 's' if len(vazios) > 1 else ''
-        flash(f"Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!", "danger")
-        valido = 0
+    hoje = datetime.now()
+    encontrada = datetime.strptime(data_encontrado, r'%Y-%m-%d')
 
-    if status != "perdido" and not resolucao and not destinatario_nome and not destinatario_documento and not destinatario_contato:
-        vazios = []
-        if not resolucao:
-            vazios.append("Resolução")
-        if not destinatario_nome:
-            vazios.append("Nome do destinatário")
-        if not destinatario_documento:
-            vazios.append("Documento do destinatário")
-        if not destinatario_contato:
-            vazios.append("Contato do destinatário")
-
-        plural = 's' if len(vazios) > 1 else ''
-        flash(f"Status não é perdido assim os campo{plural} devem ser preenchido{plural}:  {', '.join(vazios)}!", "danger")
-        valido = 0
-
-    if not valido:
-        return redirect(url_for(".objeto_edit", objeto_id=objeto_id))
-
-    objeto = db.objetos.find_one({"_id": ObjectId(objeto_id)})
+    if encontrada > hoje:
+        flash('Data encontrada inválida!', 'danger')
+        return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
     caminho_da_imagem = None
     if not remover_imagem:
@@ -223,55 +242,82 @@ def objeto_edit_action(objeto_id):
                     flash('Tipo de arquivo da imagem não permitido ou falha ao salvar.', 'danger')
 
         if not caminho_da_imagem:
-            caminho_da_imagem = objeto.get("imagem")
+            caminho_da_imagem = objeto.get('imagem')
 
-    # Preparar dados para atualização
+    if not status:
+        flash(f'Status não pode ser vazio!', 'danger')
+        return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
+
+    vazios = []
+    if not all([descricao, local_encontrado]):
+        if not descricao:
+            vazios.append('Descrição')
+        if not local_encontrado:
+            vazios.append('Local encontrado')
+
+    if status != 'perdido' and not all([resolucao, destinatario_nome, destinatario_documento, destinatario_contato]):
+        if not resolucao:
+            vazios.append('Resolução')
+        if not destinatario_nome:
+            vazios.append('Nome do destinatário')
+        if not destinatario_documento:
+            vazios.append('Documento do destinatário')
+        if not destinatario_contato:
+            vazios.append('Contato do destinatário')
+
+    if vazios:
+        plural = 's' if len(vazios) > 1 else ''
+        flash(f'Campo{plural} não preenchido{plural}: {', '.join(vazios)}!', 'danger')
+        return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
+
+    campos = {}
+    for campo in categoria.get('campos', []):
+        campos[campo] = request.form.get(f'campos[{campo}]', '')
+
     update_data = {
-        "descricao": descricao,
-        "data_encontrado": data_encontrado,
-        "local_encontrado": local_encontrado,
-        "imagem": caminho_da_imagem,
-        "identificacao": identificacao,
-        "resolvido": resolvido == "on",
-        "status": status,
-        "resolucao": resolucao,
-        "destinatario": {
-            "nome": destinatario_nome,
-            "documento": destinatario_documento,
-            "contato": destinatario_contato,
+        'descricao': descricao,
+        'data_encontrado': data_encontrado,
+        'local_encontrado': local_encontrado,
+        'imagem': caminho_da_imagem,
+        'identificacao': identificacao,
+        'resolvido': resolvido is not None,
+        'status': status,
+        'resolucao': resolucao,
+        'destinatario': {
+            'nome': destinatario_nome,
+            'documento': destinatario_documento,
+            'contato': destinatario_contato,
         }
     }
 
-    valores_campos = objeto.get("campos_valores", {})
-    if valores_campos:
-        for campo in valores_campos.keys():
-            key = f"campos_valores[{campo}]"
-            valor = request.form.get(key)
+    campos = objeto.get('campos', {})
+    if campos:
+        for campo in campos.keys():
+            valor = request.form.get(f'campos_valores[{campo}]')
             if valor is not None:
-                valores_campos[campo] = valor
-                update_data["campos_valores"] = valores_campos
+                campos[campo] = valor
+        update_data['campos_valores'] = campos
 
     try:
         result = objetos_collections.update_one(
-            {"_id": ObjectId(objeto_id)},
-            {"$set": update_data}
+            {'_id': ObjectId(objeto_id)},
+            {'$set': update_data}
         )
 
         if result.modified_count == 1:
-            flash("Objeto atualizado com sucesso!", "success")
+            flash('Objeto atualizado com sucesso!', 'success')
         else:
-            flash("Nenhuma alteração foi detectada.", "warning")
+            flash('Nenhuma alteração foi detectada.', 'warning')
+    except Exception:
+        flash('Erro crítico na atualização do objeto!', 'danger')
 
-    except Exception as e:
-        flash("Erro crítico na atualização do objeto!", "danger")
-
-    return redirect(url_for(".objeto_index"))
+    return redirect(url_for('.objeto_index'))
 
 
-@objeto.route("/admin/objeto/<string:objeto_id>/delete")
+@objeto.route('/admin/objeto/<string:objeto_id>/delete')
 @login_required
 @session_expired
 @admin_required
 def objeto_deletar(objeto_id):
-    objetos_collections.delete_one({"_id": ObjectId(objeto_id)})
-    return redirect(url_for(".objeto_index"))
+    objetos_collections.delete_one({'_id': ObjectId(objeto_id)})
+    return redirect(url_for('.objeto_index'))
