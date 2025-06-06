@@ -7,14 +7,15 @@ from datetime import datetime, timezone
 import secret
 import pymongo
 
-
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 objetos_collections = db['objetos']
 categorias_collections = db['categorias']
+
 objeto = Blueprint("objeto", __name__)
 
 
+#  ??????
 def get_objetos_perdidos():
     query = {"status": "perdido"}
     objetos = list(objetos_collections.find(query).sort("data_encontrado", -1))
@@ -37,33 +38,9 @@ def get_objetos_perdidos():
 @login_required
 @session_expired
 def objeto_index():
-    pipeline = [
-        {
-            "$lookup": {
-                "from": "categorias",
-                "localField": "categoria",
-                "foreignField": "_id",
-                "as": "categoria"
-            }
-        },
-        {"$unwind": "$categoria"},
-        {"$sort": {"data_encontrado": -1}}
-    ]
-    objetos = list(db.objetos.aggregate(pipeline))
+    categorias = categorias_collections.find()
+    objetos = objetos_collections.find()
 
-    for obj in objetos:
-        valores = obj.get('campos_valores', {})
-        obj["_id"] = str(obj["_id"])
-        obj["categoria"]["_id"] = str(obj["categoria"]["_id"])
-        obj['campos'] = {
-            campo: valores.get(campo, '') for campo in obj['categoria'].get('campos', [])
-        }
-
-    categorias = list(db.categorias.find())
-
-    for cat in categorias:
-        cat["_id"] = str(cat["_id"])
-        cat["campos"] = cat.get("campos", [])
     sessao = {
         "id": session.get("funcionario_id", ""),
         "nome": session.get("nome", ""),
