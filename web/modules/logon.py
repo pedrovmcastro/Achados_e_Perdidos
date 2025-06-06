@@ -1,15 +1,16 @@
-from flask import Blueprint, request, redirect, url_for, session, flash
 from bson.codec_options import CodecOptions
+from flask import Blueprint, request, redirect, url_for, session, flash
+from hashlib import sha256
 import secret
 import pymongo
-import hashlib
+
 from datetime import timezone
 from time import time
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
-
 funcionarios_collections = db['funcionarios']
+
 logon = Blueprint("logon", __name__)
 
 
@@ -21,7 +22,7 @@ def logon_action():
     if matricula and senha:
         funcionario = funcionarios_collections.find_one({
             "matricula": matricula,
-            "senha": hashlib.sha256(senha.encode('utf-8')).hexdigest(),
+            "senha": sha256(senha.encode('utf-8')).hexdigest(),
         })
 
         if funcionario and not funcionario.get("desligado"):
