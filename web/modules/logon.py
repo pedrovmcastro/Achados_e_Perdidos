@@ -1,17 +1,25 @@
 from bson.codec_options import CodecOptions
 from flask import Blueprint, request, redirect, url_for, session, flash
 from hashlib import sha256
+from datetime import datetime, timezone
+from time import time
 import secret
 import pymongo
 
-from datetime import timezone
-from time import time
 
 client = pymongo.MongoClient(secret.ATLAS_CONNECTION_STRING)
 db = client['achadoseperdidos'].with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone.utc))
 funcionarios_collections = db['funcionarios']
 
 logon = Blueprint("logon", __name__)
+
+
+def data_valida(s):
+    try:
+        datetime.strptime(s, r'%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 
 @logon.route("/logon", methods=["POST"])

@@ -12,10 +12,6 @@ categoria_collections = db['categorias']
 
 categoria = Blueprint('categoria', __name__)
 
-#????????????????
-def get_nomes_categorias():
-    return [cat['nome'] for cat in categoria_collections.find()]
-
 
 @categoria.route('/admin/categoria')
 @login_required
@@ -130,7 +126,6 @@ def categoria_edit_action(categoria_id):
     return redirect(url_for('.categoria_index'))
 
 
-
 @categoria.route('/admin/categoria/delete/<string:categoria_id>')
 @login_required
 @session_expired
@@ -138,22 +133,6 @@ def categoria_edit_action(categoria_id):
 def categoria_delete(categoria_id):
     categoria_collections.delete_one({'_id': ObjectId(categoria_id)})
     return redirect(url_for('.categoria_index'))
-
-
-#????????????????
-@categoria.route('/api/categoria/<categoria_id>')
-@login_required
-@session_expired
-def get_categoria(categoria_id):
-    categoria = categoria_collections.find_one({'_id': ObjectId(categoria_id)})
-
-    if not categoria:
-        flash('Categoria não encontrada', 'danger')
-    return jsonify({
-        '_id': str(categoria['_id']),
-        'nome': categoria['nome'],
-        'campos': categoria['campos']
-    })
 
 
 @categoria.route('/admin/_get_campos/<categoria_id>', methods=['GET'])
@@ -167,3 +146,8 @@ def get_campos(categoria_id):
     return jsonify({
         'campos': categoria.get('campos')
     })
+
+
+def get_categorias():
+    categorias = categoria_collections.find()
+    return categorias

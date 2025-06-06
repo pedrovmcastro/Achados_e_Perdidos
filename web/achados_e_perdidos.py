@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from datetime import datetime
 
 from modules.funcionarios import funcionario
-from modules.categorias import categoria, get_nomes_categorias
+from modules.categorias import categoria, get_categorias
 from modules.objetos import objeto, get_objetos_perdidos
 from modules.logon import logon
 

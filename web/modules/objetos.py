@@ -15,7 +15,6 @@ categorias_collections = db['categorias']
 objeto = Blueprint('objeto', __name__)
 
 
-# Função auxiliar
 def data_valida(s):
     try:
         datetime.strptime(s, r'%Y-%m-%d')
