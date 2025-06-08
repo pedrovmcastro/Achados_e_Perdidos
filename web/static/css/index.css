@@ -1,15 +1,16 @@
- body {
+body {
     background-color: #f8f9fa;
-}
-
-header h1 {
-    font-size: 1.8rem;
-    font-weight: bold;
 }
 
 .card {
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
 }
 
 .btn {
@@ -21,8 +22,7 @@ table {
     overflow: hidden;
 }
 
-#tabela-objetos thead th,
-#tabela-objetos td  {
+#objetos thead th {
     text-align: center;
 }
 
@@ -31,10 +31,6 @@ table {
     position: relative;
     user-select: none;
     padding-right: 25px !important;
-}
-
-sortable:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .sortable::after {
@@ -58,4 +54,3 @@ sortable:hover {
     opacity: 1;
     color: #fff;
 }
-

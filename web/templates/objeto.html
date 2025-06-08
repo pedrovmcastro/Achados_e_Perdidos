@@ -89,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#busca_status').value = 0;
         pesquisar()
     })
+
+    ordernaColunas()
 });
 
 function pesquisar() {
@@ -177,6 +179,92 @@ Object.defineProperty(String.prototype, 'capitalize', {
     },
     enumerable: false
 });
+
+function ordernaColunas() {
+    const tabela = document.querySelector(`#objetos`);
+
+    const thead = tabela.querySelector("thead"); // Seleciona o thead
+    const headers = thead.querySelectorAll("th"); // Ainda precisamos deles para o texto e índice
+    const tbody = tabela.querySelector("tbody");
+
+    let currentColumn = null;
+    let isAscending = true;
+
+    // Adiciona o listener APENAS ao thead (elemento pai)
+    thead.addEventListener('click', (event) => {
+        const clickedHeader = event.target.closest('th'); // Encontra o TH mais próximo do elemento clicado
+        if (!clickedHeader) return; // Se o clique não foi em um TH, ignora
+
+        const columnIndex = Array.from(headers).indexOf(clickedHeader); // Encontra o índice do TH clicado
+        if (columnIndex === -1) return; // Se não encontrou o índice, ignora
+
+        if (currentColumn === columnIndex) {
+            isAscending = !isAscending;
+        } else {
+            currentColumn = columnIndex;
+            isAscending = true;
+        }
+
+        sortTable(columnIndex, isAscending);
+        updateHeaderIndicators(columnIndex, isAscending);
+    });
+
+    headers.forEach((header) => {
+        header.classList.add('sortable');
+        header.style.cursor = 'pointer';
+    });
+
+    function sortTable(columnIndex, ascending) {
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const isDateColumn = headers[columnIndex].textContent.trim() === 'Data Encontrado';
+
+        rows.sort((a, b) => {
+            const aVal = a.children[columnIndex].textContent.trim();
+            const bVal = b.children[columnIndex].textContent.trim();
+
+            if (isDateColumn) {
+                return compareDates(aVal, bVal, ascending);
+            }
+            return compareStrings(aVal, bVal, ascending);
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function compareDates(a, b, ascending) {
+        const dateA = parseDate(a);
+        const dateB = parseDate(b);
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+            return 0;
+        }
+        return ascending ? dateA - dateB : dateB - dateA;
+    }
+
+    function parseDate(dateString) {
+        if (!dateString) return new Date(0);
+        const [day, month, year] = dateString.split('/');
+        if (isNaN(day) || isNaN(month) || isNaN(year)) {
+             return new Date(NaN);
+        }
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+
+    function compareStrings(a, b, ascending) {
+        const comparison = a.localeCompare(b, 'pt-BR', { sensitivity: 'base' });
+        return ascending ? comparison : -comparison;
+    }
+
+    function updateHeaderIndicators(activeColumn, ascending) {
+        headers.forEach((header, index) => {
+            header.classList.remove('asc', 'desc');
+
+            if (index === activeColumn) {
+                header.classList.add(ascending ? 'asc' : 'desc');
+            }
+        });
+    }
+}
     </script>
 </head>
 

@@ -8,85 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}" />
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelector("#pesquisar").addEventListener("click", pesquisar)
-
-    document.querySelector("#limpar").addEventListener("click", () => {
-        document.querySelector('#busca_data_encontrado').value = '';
-        document.querySelector('#busca_categoria').value = 0;
-        document.querySelector('#busca_identificacao').value = '';
-        document.querySelector('#busca_local_encontrado').value = '';
-        pesquisar()
-    })
-});
-
-function pesquisar() {
-    const data = document.querySelector('#busca_data_encontrado').value;
-    const categoria = document.querySelector('#busca_categoria').value;
-    const identificacao = document.querySelector('#busca_identificacao').value;
-    const local = document.querySelector('#busca_local_encontrado').value;
-
-    const queryParams = new URLSearchParams();
-    if (data) queryParams.append('data_encontrado', data);
-    if (categoria) queryParams.append('categoria_id', categoria);
-    if (identificacao) queryParams.append('identificacao', identificacao);
-    if (local) queryParams.append('local_encontrado', local);
-
-    fetch(`busca?${queryParams.toString()}`, {mode: 'cors'})
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(objetos => {
-            atualizarTabela(objetos);
-        })
-        .catch(error => {
-            console.error('Erro ao buscar objetos:', error);
-            alert('Ocorreu um erro ao realizar a busca. Tente novamente mais tarde.');
-        });
-}
-
-function atualizarTabela(objetos) {
-    const tbody = document.querySelector("#objetos tbody");
-    tbody.innerHTML = "";
-
-    if (objetos.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = '<td class="text-center" colspan="4">Nenhum objeto encontrado com os filtros aplicados.</td>';
-        tbody.appendChild(row);
-        return;
-    }
-
-    objetos.forEach(objeto => {
-        const row = document.createElement('tr');
-
-        let col = document.createElement('td');
-        col.textContent = formata_data(objeto.data_encontrado);
-        row.appendChild(col)
-
-        col = document.createElement('td');
-        col.textContent = objeto.categoria_nome || '';
-        row.appendChild(col)
-
-        col = document.createElement('td');
-        col.textContent = objeto.identificacao || '';
-        row.appendChild(col)
-
-        col = document.createElement('td');
-        col.textContent = objeto.local_encontrado || '';
-        row.appendChild(col)
-
-        tbody.appendChild(row);
-    });
-}
-
-function formata_data(value) {
-    return value ? value.split('-').reverse().join('/') : ''
-}
-    </script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </head>
 
 <body>
@@ -148,7 +70,7 @@ function formata_data(value) {
             <table id="objetos" class="table table-striped table-hover rounded">
                 <thead class="table-dark">
                     <tr>
-                        <th>Data Encontrado</th>
+                        <th>Data</th>
                         <th>Categoria</th>
                         <th>Identificação</th>
                         <th>Local Encontrado</th>
