@@ -2,7 +2,7 @@ from bson.codec_options import CodecOptions
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
 from decorators import login_required, session_expired, admin_required
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from upload import salvar_arquivo
 import pymongo
 import secret
@@ -21,25 +21,6 @@ def data_valida(s):
         return True
     except ValueError:
         return False
-
-
-#  ??????
-def get_objetos_perdidos():
-    query = {'status': 'perdido'}
-    objetos = list(objetos_collections.find(query).sort('data_encontrado', -1))
-
-    objetos_perdidos = []
-
-    for obj in objetos:
-        categoria = categorias_collections.find_one({'_id': obj['categoria']})
-        objetos_perdidos.append({
-            'categoria': categoria['nome'],
-            'identificacao': obj['identificacao'],
-            'local_encontrado': obj['local_encontrado'],
-            'data_encontrado': obj['data_encontrado']
-        })
-
-    return objetos_perdidos
 
 
 @objeto.route('/admin/objeto')
@@ -247,7 +228,7 @@ def objeto_edit_action(objeto_id):
             caminho_da_imagem = objeto.get('imagem')
 
     if not status:
-        flash(f'Status não pode ser vazio!', 'danger')
+        flash('Status não pode ser vazio!', 'danger')
         return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
     vazios = []
@@ -323,3 +304,41 @@ def objeto_edit_action(objeto_id):
 def objeto_deletar(objeto_id):
     objetos_collections.delete_one({'_id': ObjectId(objeto_id)})
     return redirect(url_for('.objeto_index'))
+
+
+def get_objetos_perdidos():
+    objetos = list(objetos_collections.aggregate([
+        {
+            "$match": {
+                "status": "perdido"  # Filtra objetos com status "perdido"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "categorias",
+                "localField": "categoria",
+                "foreignField": "_id",
+                "as": "detalhes_categoria"
+            }
+        },
+        {
+            "$unwind": "$detalhes_categoria"
+        },
+        {
+            "$project": {
+                "_id": 1,
+                "data_encontrado": 1,
+                "identificacao": 1,
+                "local_encontrado": 1,
+                "categoria_nome": "$detalhes_categoria.nome",
+                "status": 1,
+            }
+        },
+        {
+            "$sort": {
+                "data_encontrado": -1
+            }
+        }
+    ]))
+
+    return objetos

@@ -1,3 +1,4 @@
+{% set estados = ["perdido", "doado", "entregue"] %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -77,6 +78,104 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         }
     })
+
+    document.querySelector("#pesquisar").addEventListener("click", pesquisar)
+
+    document.querySelector("#limpar").addEventListener("click", () => {
+        document.querySelector('#busca_data_encontrado').value = '';
+        document.querySelector('#busca_categoria').value = 0;
+        document.querySelector('#busca_identificacao').value = '';
+        document.querySelector('#busca_local_encontrado').value = '';
+        document.querySelector('#busca_status').value = 0;
+        pesquisar()
+    })
+});
+
+function pesquisar() {
+    const data = document.querySelector('#busca_data_encontrado').value;
+    const categoria = document.querySelector('#busca_categoria').value;
+    const identificacao = document.querySelector('#busca_identificacao').value;
+    const local = document.querySelector('#busca_local_encontrado').value;
+    const status = document.querySelector('#busca_status').value;
+
+    const queryParams = new URLSearchParams();
+    if (data) queryParams.append('data_encontrado', data);
+    if (categoria) queryParams.append('categoria_id', categoria);
+    if (identificacao) queryParams.append('identificacao', identificacao);
+    if (local) queryParams.append('local_encontrado', local);
+    if (status) queryParams.append('status', status);
+
+    fetch(`busca?${queryParams.toString()}`, {mode: 'cors'})
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(objetos => {
+            atualizarTabela(objetos);
+        })
+        .catch(error => {
+            console.error('Erro ao buscar objetos:', error);
+            alert('Ocorreu um erro ao realizar a busca. Tente novamente mais tarde.');
+        });
+}
+
+function atualizarTabela(objetos) {
+    const tbody = document.querySelector("#objetos tbody");
+    tbody.innerHTML = "";
+
+    if (objetos.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = '<td class="text-center" colspan="6">Nenhum objeto encontrado com os filtros aplicados.</td>';
+        tbody.appendChild(row);
+        return;
+    }
+
+    objetos.forEach(objeto => {
+        const row = document.createElement('tr');
+
+        let col = document.createElement('td');
+        col.textContent = formata_data(objeto.data_encontrado);
+        row.appendChild(col)
+
+        col = document.createElement('td');
+        col.textContent = objeto.categoria_nome || '';
+        row.appendChild(col)
+
+        col = document.createElement('td');
+        col.textContent = objeto.identificacao || '';
+        row.appendChild(col)
+
+        col = document.createElement('td');
+        col.textContent = objeto.local_encontrado || '';
+        row.appendChild(col);
+
+        col = document.createElement('td');
+        col.textContent = objeto.status.capitalize() || '';
+        row.appendChild(col)
+
+        col = document.createElement('td');
+        let a = document.createElement('a');
+        a.classList.add('btn', 'btn-sm', 'btn-outline-primary');
+        a.setAttribute('href', `/admin/objeto/edit/${ objeto._id }`);
+        a.text = 'Editar';
+        col.appendChild(a)
+        row.append(col)
+
+        tbody.appendChild(row);
+    });
+}
+
+function formata_data(value) {
+    return value ? value.split('-').reverse().join('/') : ''
+}
+
+Object.defineProperty(String.prototype, 'capitalize', {
+    value: function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    },
+    enumerable: false
 });
     </script>
 </head>
@@ -175,12 +274,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>
                         <form class="card p-4 mb-5">
                             <div class="row g-3">
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label class="form-label">Data Encontrado</label>
                                     <input type="date" class="form-control" id="busca_data_encontrado" name="data_encontrado"  max="{{ hoje }}" />
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <label class="form-label">Categoria</label>
                                     <select class="form-select" id="busca_categoria" name="categoria">
                                         <option value="0">Nenhuma</option>
@@ -199,16 +298,26 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <label class="form-label">Local Encontrado</label>
                                     <input type="text" class="form-control" id="busca_local_encontrado" name="local_encontrado" />
                                 </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">Status</label>
+                                    <select class="form-select" id="busca_status" name="Status">
+                                        <option value="0">Nenhum</option>
+                                        {% for estado in estados %}
+                                        <option value="{{ estado }}">{{ estado.capitalize() }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                             <div class="row g-3 mt-3">
                                 <div class="col-md-3">
                                     &nbsp;
                                 </div>
                                 <div class="col-md-3">
-                                    <button type="button" class="btn btn-primary w-100" id="btnPesquisar" onclick="pesquisar(objetosJSON, categoriasJSON)">Pesquisar</button>
+                                    <button type="button" class="btn btn-primary w-100" id="pesquisar">Pesquisar</button>
                                 </div>
                                 <div class="col-md-3">
-                                    <button type="reset" class="btn btn-outline-secondary w-100" id="btnLimpar">Limpar</button>
+                                    <button type="reset" class="btn btn-outline-secondary w-100" id="limpar">Limpar</button>
                                 </div>
                             </div>
                             </div>
@@ -250,8 +359,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-
 </body>
 
 </html>

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
+from decorators import login_required, session_expired, admin_required
 import pymongo
 import secret
 
@@ -20,14 +21,7 @@ def data_valida(s):
         return False
 
 
-@busca.route("/busca", methods=["GET"])
-def buscar_objetos():
-    data_encontrado = request.args.get('data_encontrado')
-    categoria_id = request.args.get('categoria_id')
-    identificacao = request.args.get('identificacao')
-    local_encontrado = request.args.get('local_encontrado')
-    backend = request.args.get('backend')
-
+def buscar_objetos(data_encontrado, categoria_id, identificacao, local_encontrado, status, backend=False):
     query = {}
 
     if data_encontrado:
@@ -42,11 +36,13 @@ def buscar_objetos():
 
         query['data_encontrado'] = data_encontrado
 
-    if categoria_id:
+    if categoria_id and categoria_id != '0':
         categoria = db.categorias.find_one({'_id': ObjectId(categoria_id)})
 
         if not categoria:
             return jsonify({"error": "Categoria inválida"}), 400
+
+        query['categoria'] = ObjectId(categoria_id)
 
     if identificacao:
         query['identificacao'] = {"$regex": identificacao, "$options": "i"}
@@ -54,15 +50,21 @@ def buscar_objetos():
     if local_encontrado:
         query['local_encontrado'] = {"$regex": local_encontrado, "$options": "i"}
 
-    if not backend:
-        query['status'] = 'perdido'
+    if backend and status and status != '0':
+        if status.lower() not in ["perdido", "doado", "entregue"]:
+            return jsonify({"error": "Status inválida"}), 400
+
+        query['status'] = status
 
     pipeline = []
 
     if query:
         pipeline.append({"$match": query})
 
-    project = {
+    print(query)
+
+    project_fields = {
+        "_id": 0,
         "data_encontrado": 1,
         "categoria_nome": "$categoria.nome",
         "identificacao": 1,
@@ -70,10 +72,9 @@ def buscar_objetos():
     }
 
     if backend:
-        project.extend({
-            "_id": {"$toString": "$_id"},
+        project_fields["_id"] = {"$toString": "$_id"}
+        project_fields.update({
             "status": 1,
-            "categoria_id": {"$toString": "$categoria._id"},
         })
 
     pipeline.extend([
@@ -82,22 +83,46 @@ def buscar_objetos():
                 "from": "categorias",
                 "localField": "categoria",
                 "foreignField": "_id",
-                "as": "$categoria"
+                "as": "categoria"
             }
         },
         {
-            "$unwind": "$categoria"
+            "$unwind": "$categoria",
         },
         {
-             "$project": project
+            "$project": project_fields,
+        },
+        {
+            "$sort": {
+                "data_encontrado": -1
+            }
         }
-        {"$sort": {"data_encontrado": -1}}
     ])
 
-    objetos_encontrados = list(objetos_collections.aggregate(pipeline))
+    objetos = list(objetos_collections.aggregate(pipeline))
+    print(objetos)
 
-    for obj in objetos_encontrados:
-        obj['categoria_nome'] = obj['categoria']['nome']
-        obj['data_encontrado'] = obj['data_encontrado'].strftime("%Y-%m-%d")
+    return jsonify(objetos)
 
-    return jsonify(objetos_encontrados)
+
+@busca.route("/busca", methods=["GET"])
+def buscar_front():
+    data_encontrado = request.args.get('data_encontrado')
+    categoria_id = request.args.get('categoria_id')
+    identificacao = request.args.get('identificacao')
+    local_encontrado = request.args.get('local_encontrado')
+
+    return buscar_objetos(data_encontrado, categoria_id, identificacao, local_encontrado, None)
+
+
+@login_required
+@session_expired
+@busca.route("/admin/busca", methods=["GET"])
+def buscar_admin():
+    data_encontrado = request.args.get('data_encontrado')
+    categoria_id = request.args.get('categoria_id')
+    identificacao = request.args.get('identificacao')
+    local_encontrado = request.args.get('local_encontrado')
+    status = request.args.get('status')
+
+    return buscar_objetos(data_encontrado, categoria_id, identificacao, local_encontrado, status, backend=True)

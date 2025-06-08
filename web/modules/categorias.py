@@ -149,5 +149,11 @@ def get_campos(categoria_id):
 
 
 def get_categorias():
-    categorias = categoria_collections.find()
+    categorias = []
+    for categoria in categoria_collections.find():
+        categorias.append({
+            "id": str(categoria["_id"]),
+            "nome": categoria["nome"],
+        })
+
     return categorias
