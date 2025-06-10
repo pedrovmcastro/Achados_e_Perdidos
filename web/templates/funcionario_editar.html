@@ -57,7 +57,7 @@
 
             <!-- Conteúdo Principal -->
             <div class="col-md-9">
-                <h3 class="mb-4">Editar Funcionário</h3>
+                <h3 class="mb-3">Editar Funcionário</h3>
                 <div class="card p-4">
                     <form method="POST" action="{{ url_for('funcionario.funcionario_edit_action', funcionario_id=funcionario._id) }}">
                         <div class="mb-3">
@@ -88,8 +88,8 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="cep" class="form-label">CEP</label>
-                            <input type="text" class="form-control" id="cep" name="cep" value="{{ funcionario.endereco.cep }}" placeholder="00000-000" />
+                            <label for="cep" class="form-label">CEP<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="cep" name="cep" placeholder="00000-000" onkeyup="this.value = maskCEP(this.value)" maxlength="9" required />
                         </div>
 
                         <div class="d-flex gap-2">

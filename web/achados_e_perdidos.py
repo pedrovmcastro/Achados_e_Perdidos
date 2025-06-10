@@ -5,9 +5,10 @@ from zoneinfo import ZoneInfo
 from datetime import datetime
 
 from modules.funcionarios import funcionario
-from modules.categorias import categoria, get_nomes_categorias
+from modules.categorias import categoria, get_categorias
 from modules.objetos import objeto, get_objetos_perdidos
 from modules.logon import logon
+from modules.busca import busca
 
 app = Flask(__name__)
 app.secret_key = '-\x06\xb3\xbd\x15/\xc3\xef~\xd8]\xb3\xef\xd8\xa3\xe5\xa5Sn\xf3SNx\xa9'
@@ -16,6 +17,7 @@ app.register_blueprint(categoria)
 app.register_blueprint(objeto)
 app.register_blueprint(funcionario)
 app.register_blueprint(logon)
+app.register_blueprint(busca)
 
 
 # Filtros #
@@ -24,19 +26,15 @@ def jinja_format_datetime(value):
     if value is None:
         return ""
 
-    # Converte string para datetime se necessário
     if isinstance(value, str):
         try:
-            # Tenta parsear com hora
             value = datetime.strptime(value, "%Y-%m-%d")
         except ValueError:
-            return value  # Deixa como está se o formato for desconhecido
+            return value
 
-    # Ajusta para fuso horário
     if value.tzinfo is None:
-        value = value.replace(tzinfo=ZoneInfo("UTC"))  # assume UTC se não tiver tz
+        value = value.replace(tzinfo=ZoneInfo("UTC"))
 
-    # Converte para o fuso horário de São Paulo
     local_tz = ZoneInfo("America/Sao_Paulo")
     value_local = value.astimezone(local_tz)
     return value_local.strftime("%d/%m/%Y")
@@ -52,10 +50,14 @@ def index():
         "administrador": session.get("administrador", ""),
         "logado": session.get("logado", ""),
     }
+
+    hoje = datetime.now().strftime(r'%Y-%m-%d')
+
     return render_template('index.html',
                            objetos_perdidos=get_objetos_perdidos(),
-                           categorias=get_nomes_categorias(),
-                           sessao=sessao)
+                           categorias=get_categorias(),
+                           hoje=hoje,
+                           sessao=sessao,)
 
 
 @app.route('/admin/')
@@ -67,6 +69,7 @@ def admin():
         "nome": session.get("nome", ""),
         "administrador": session.get("administrador", ""),
     }
+
     return render_template('admin.html', sessao=sessao)
 
 
