@@ -124,7 +124,7 @@ def objeto_add():
         'data_encontrado': data_encontrado,
         'identificacao': identificacao,
         'local_encontrado': local_encontrado,
-        'campos_valores': campos,
+        'campos': campos,
         'resolvido': False,
         'status': 'perdido'
     }
@@ -276,10 +276,10 @@ def objeto_edit_action(objeto_id):
     campos = objeto.get('campos', {})
     if campos:
         for campo in campos.keys():
-            valor = request.form.get(f'campos_valores[{campo}]')
+            valor = request.form.get(f'campos[{campo}]')
             if valor is not None:
                 campos[campo] = valor
-        update_data['campos_valores'] = campos
+        update_data['campos'] = campos
 
     try:
         result = objetos_collections.update_one(
