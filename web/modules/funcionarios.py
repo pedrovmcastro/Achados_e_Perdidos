@@ -86,7 +86,7 @@ def funcionario_add():
             vazios.append('Rua')
 
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}:  {", ".join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
     new_data = {
@@ -167,7 +167,7 @@ def funcionario_edit_action(funcionario_id):
             vazios.append('Rua')
 
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.funcionario_edit', funcionario_id=funcionario_id))
 
     cep = cep.replace('-', '') if cep else None

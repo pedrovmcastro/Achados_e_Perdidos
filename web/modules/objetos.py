@@ -111,7 +111,7 @@ def objeto_add():
             vazios.append('Local encontrado')
 
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}: {', '.join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_index'))
 
     campos = {campo: request.form.get(f'campos[{campo}]', '') for campo in categoria.get('campos', [])}
@@ -250,7 +250,7 @@ def objeto_edit_action(objeto_id):
 
     if vazios:
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}: {', '.join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
     campos = {}

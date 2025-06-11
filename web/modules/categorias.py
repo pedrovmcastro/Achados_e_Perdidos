@@ -46,7 +46,7 @@ def categoria_add_action():
             vazios.append('Campos')
 
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}: {', '.join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}:  {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_index'))
 
     campos = [campo.capitalize().strip().replace(' ', '_') for campo in campos]
@@ -101,7 +101,7 @@ def categoria_edit_action(categoria_id):
             vazios.append('Campos')
 
         plural = 's' if len(vazios) > 1 else ''
-        flash(f'Campo{plural} não preenchido{plural}:  {', '.join(vazios)}!', 'danger')
+        flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_edit', categoria_id=categoria_id))
 
     campos = [campo.capitalize().strip().replace(' ', '_') for campo in campos]
