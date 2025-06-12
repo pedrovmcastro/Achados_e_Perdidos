@@ -90,7 +90,7 @@ def funcionario_add():
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
-    if not senha != senhaConfirmar:
+    if senha != senhaConfirmar:
         flash('Senha e confirmação de senha não coicidem!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
@@ -176,7 +176,7 @@ def funcionario_edit_action(funcionario_id):
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.funcionario_edit', funcionario_id=funcionario_id))
 
-    if not senha != senhaConfirmar:
+    if senha != senhaConfirmar:
         flash('Senha e confirmação de senha não coicidem!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
