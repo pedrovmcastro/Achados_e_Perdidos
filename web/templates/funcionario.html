@@ -30,6 +30,18 @@ function maskCEP(value) {
     value = value.replace(/^(\d{5})(\d)/, "$1-$2");
     return value;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelector("form").addEventListener("submit", (e) => {
+        if (document.querySelector('#senha').value !== document.querySelector('#senhaConfirmar').value) {
+            const erroSenha = document.querySelector('#erroSenha');
+            erroSenha.classList.remove("d-none");
+            document.querySelector('#senha').value = ''
+            document.querySelector('#senhaConfirmar').value = ''
+            document.querySelector('#senhaConfirmar').focus
+        }
+    })
+});
     </script>
 </head>
 
@@ -87,11 +99,12 @@ function maskCEP(value) {
                             <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite uma senha" required />
                         </div>
 
-
                         <div class="mb-3">
                             <label for="senha" class="form-label">Confime a senha<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="senha" name="senhaConfirmar" placeholder="Confirme a senha" onkeyup="this.value = maskCEP(this.value)" required />
+                            <input type="password" class="form-control" id="senhaConfirmar" name="senhaConfirmar" placeholder="Confirme a senha" required />
                         </div>
+
+                        <p id="erroSenha" class="d-none text-danger">Senha e confirmação de senha não coicidem!</p>
 
                         <div class="form-check form-switch mb-4">
                             <input class="form-check-input" type="checkbox" id="administrador" name="administrador" />
@@ -101,12 +114,12 @@ function maskCEP(value) {
                         <h5 class="mb-3">Endereço</h5>
                         <div class="mb-3">
                             <label for="rua" class="form-label">Rua</label>
-                            <input type="text" class="form-control" id="rua" name="rua" placeholder="Rua, Avenida, etc." required />
+                            <input type="text" class="form-control" id="rua" name="rua" placeholder="Rua, Avenida, etc." />
                         </div>
 
                         <div class="mb-4">
                             <label for="cep" class="form-label">CEP</label>
-                            <input type="text" class="form-control" id="cep" name="cep" placeholder="00000-000" onkeyup="this.value = maskCEP(this.value)" maxlength="9" required />
+                            <input type="text" class="form-control" id="cep" name="cep" placeholder="00000-000" onkeyup="this.value = maskCEP(this.value)" maxlength="9" />
                         </div>
 
                         <div>
@@ -145,7 +158,8 @@ function maskCEP(value) {
                 </table>
                 {% else %}
                 <p>Nenhum funcionário cadastrado! :(</p>
-                {% endif %} {% if sessao.administrador %}
+                {% endif %}
+                {% if sessao.administrador %}
 
                 <hr />
 

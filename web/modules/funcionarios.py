@@ -56,6 +56,7 @@ def funcionario_add():
     nome = request.form.get('nome')
     matricula = request.form.get('matricula')
     senha = request.form.get('senha')
+    senhaConfirmar = request.form.get('senhaConfirmar')
     administrador = request.form.get('administrador')
     rua = request.form.get('rua')
     cep = request.form.get('cep')
@@ -72,21 +73,25 @@ def funcionario_add():
         flash('Matricula tem que ser única!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
-    if len(cep) < 9:
+    if 1 <= len(cep) < 9:
         flash('Formato do CEP inválido!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
-    if not all([nome, senha, rua]):
+    if not all([nome, senha, senhaConfirmar]):
         vazios = []
         if not nome:
             vazios.append('Nome')
         if not senha:
             vazios.append('Senha')
-        if not rua:
-            vazios.append('Rua')
+        if not senhaConfirmar:
+            vazios.append('Confirmar Senha')
 
         plural = 's' if len(vazios) > 1 else ''
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
+        return redirect(url_for('.funcionario_index'))
+
+    if not senha != senhaConfirmar:
+        flash('Senha e confirmação de senha não coicidem!', 'danger')
         return redirect(url_for('.funcionario_index'))
 
     new_data = {
@@ -147,6 +152,7 @@ def funcionario_edit_action(funcionario_id):
     nome = request.form.get('nome')
     matricula = request.form.get('matricula')
     senha = request.form.get('senha')
+    senhaConfirmar = request.form.get('senhaConfirmar')
     administrador = request.form.get('administrador')
     rua = request.form.get('rua')
     cep = request.form.get('cep')
@@ -155,7 +161,7 @@ def funcionario_edit_action(funcionario_id):
         flash('Formato do CEP inválido!', 'danger')
         return redirect(url_for('.funcionario_edit', funcionario_id=funcionario_id))
 
-    if not all([nome, matricula, senha, rua]):
+    if not all([nome, matricula, senha, senhaConfirmar]):
         vazios = []
         if not nome:
             vazios.append('Nome')
@@ -163,12 +169,16 @@ def funcionario_edit_action(funcionario_id):
             vazios.append('Matrícula')
         if not senha:
             vazios.append('Senha')
-        if not rua:
-            vazios.append('Rua')
+        if not senhaConfirmar:
+            vazios.append('Confirma Senha')
 
         plural = 's' if len(vazios) > 1 else ''
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.funcionario_edit', funcionario_id=funcionario_id))
+
+    if not senha != senhaConfirmar:
+        flash('Senha e confirmação de senha não coicidem!', 'danger')
+        return redirect(url_for('.funcionario_index'))
 
     cep = cep.replace('-', '') if cep else None
     update_data = {

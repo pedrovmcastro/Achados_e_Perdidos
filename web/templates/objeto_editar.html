@@ -115,7 +115,7 @@ body {
 
                         <!-- Seção Campos -->
                         <div id="campos">
-                            {% for row in objeto.campos_valores.items()|batch(3) %}
+                            {% for row in objeto.campos.items()|batch(3) %}
                             <div class="row">
                                 {% for campo, valor in row %}
                                 <div class="col-md-4 mb-3">
