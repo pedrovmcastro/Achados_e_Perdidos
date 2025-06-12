@@ -372,7 +372,7 @@ function ordernaColunas() {
                                     <select class="form-select" id="busca_categoria" name="categoria">
                                         <option value="0">Nenhuma</option>
                                         {% for categoria in categorias %}
-                                        <option>{{ categoria }}</option>
+                                        <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
