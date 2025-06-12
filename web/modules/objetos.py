@@ -114,7 +114,7 @@ def objeto_add():
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_index'))
 
-    campos = {campo: request.form.get(f'campos[{campo}]', '') for campo in categoria.get('campos', [])}
+    campos = {campo.lower(): request.form.get(f'campos[{campo}]', '') for campo in categoria.get('campos', [])}
 
     new_data = {
         'descricao': descricao,
