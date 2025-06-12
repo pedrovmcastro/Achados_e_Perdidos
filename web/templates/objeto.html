@@ -339,7 +339,6 @@ function ordernaColunas() {
                                 <option value="" disabled selected>Selecione uma categoria</option>
                                 {% if categorias %}
                                 {% for categoria in categorias %}
-                                {{ categoria }}
                                 <option value="{{ categoria._id }}">{{ categoria.nome }}</option>
                                 {% endfor %}
                                 {% else %}
@@ -372,7 +371,7 @@ function ordernaColunas() {
                                     <select class="form-select" id="busca_categoria" name="categoria">
                                         <option value="0">Nenhuma</option>
                                         {% for categoria in categorias %}
-                                        <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                                        <option value="{{ categoria._id }}">{{ categoria.nome }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -407,7 +406,6 @@ function ordernaColunas() {
                                 <div class="col-md-3">
                                     <button type="reset" class="btn btn-outline-secondary w-100" id="limpar">Limpar</button>
                                 </div>
-                            </div>
                             </div>
                         </form>
                     </div>
