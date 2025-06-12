@@ -27,7 +27,7 @@ def data_valida(s):
 @login_required
 @session_expired
 def objeto_index():
-    categorias = categorias_collections.find()
+    categorias = list(categorias_collections.find())
     objetos = list(objetos_collections.aggregate([
         {
             '$lookup':  {
