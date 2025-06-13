@@ -23,7 +23,36 @@ body {
 .list-group-item a:hover {
     text-decoration: underline;
 }
+
     </style>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const statusSelect = document.querySelector("#statusSelect");
+    const resolucaoContainer = document.querySelector("#resolucaoContainer");
+
+    document.querySelector("#statusSelect").addEventListener('change', updateResolucaoVisibility);
+
+    function updateResolucaoVisibility() {
+        const selectedStatus = statusSelect.value;
+        console.log(selectedStatus)
+        if (selectedStatus == 'doado' || selectedStatus == 'entregue') {
+            resolucaoContainer.style.display = 'block';
+            document.querySelector("#resolucao").required = true;
+            document.querySelector("#destNome").required = true;
+            document.querySelector("#destDocumento").required = true;
+            document.querySelector("#destContato").required = true;
+        } else {
+            resolucaoContainer.style.display = 'none';
+            document.querySelector("#resolucao").required = false;
+            document.querySelector("#destNome").required = false;
+            document.querySelector("#destDocumento").required = false;
+            document.querySelector("#destContato").required = false;
+        }
+    }
+
+    updateResolucaoVisibility()
+})
+    </script>
 </head>
 
 <body>
@@ -118,8 +147,8 @@ body {
                             <div class="row">
                                 {% for campo, valor in row %}
                                 <div class="col-md-4 mb-3">
-                                    <label for="{{ campo }}" class="form-label">{{ campo }}</label>
-                                    <input type="text" class="form-control" id="campos[{{ campo }}]" name="campo[{{ campo }}]" value="{{ valor }}">
+                                    <label for="{{ campo }}" class="form-label">{{ campo.capitalize() }}</label>
+                                    <input type="text" class="form-control" id="campos[{{ campo }}]" name="campos[{{ campo }}]" value="{{ valor }}">
                                 </div>
                                 {% endfor %}
                             </div>

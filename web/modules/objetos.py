@@ -253,16 +253,16 @@ def objeto_edit_action(objeto_id):
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
-    campos = {}
-    for campo in categoria.get('campos', []):
-        campos[campo] = request.form.get(f'campos[{campo}]', '')
+    campos = {campo: request.form.get(f'campos[{campo}]') for campo in categoria.get('campos', [])}
+    print(campos)
 
     update_data = {
         'descricao': descricao,
-        'data_encontrado': data_encontrado,
-        'local_encontrado': local_encontrado,
         'imagem': caminho_da_imagem,
         'identificacao': identificacao,
+        'data_encontrado': data_encontrado,
+        'local_encontrado': local_encontrado,
+        'campos': campos,
         'resolvido': resolvido is not None,
         'status': status,
         'resolucao': resolucao,
@@ -272,14 +272,6 @@ def objeto_edit_action(objeto_id):
             'contato': destinatario_contato,
         }
     }
-
-    campos = objeto.get('campos', {})
-    if campos:
-        for campo in campos.keys():
-            valor = request.form.get(f'campos[{campo}]')
-            if valor is not None:
-                campos[campo] = valor
-        update_data['campos'] = campos
 
     try:
         result = objetos_collections.update_one(

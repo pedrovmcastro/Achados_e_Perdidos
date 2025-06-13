@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch(`_get_campos/${categoriaId}`, {mode: 'cors'})
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
                     const campos = document.querySelector('#campos');
                     campos.innerHTML = '';
                     let row = null;
@@ -67,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const input = document.createElement('input');
                         input.setAttribute('type', 'text');
                         input.classList.add('form-control');
-                        input.setAttribute('id', item);
+                        input.setAttribute('id', item.toLowerCase());
                         input.setAttribute('name', `campos[${item.toLowerCase()}]`);
                         col.appendChild(input)
 

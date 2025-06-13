@@ -17,7 +17,10 @@ categoria = Blueprint('categoria', __name__)
 @login_required
 @session_expired
 def categoria_index():
-    categorias = categoria_collections.find()
+    categorias = []
+    for categoria in categoria_collections.find():
+        categoria['campos'] = [campo.capitalize().replace("_", " ") for campo in categoria['campos']]
+        categorias.append(categoria)
 
     sessao = {
         'id': session.get('funcionario_id', ''),
@@ -49,7 +52,7 @@ def categoria_add_action():
         flash(f'Campo{plural} não preenchido{plural}:  {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_index'))
 
-    campos = [campo.capitalize().strip().replace(' ', '_') for campo in campos]
+    campos = [campo.lower().strip().replace(' ', '_') for campo in campos]
     new_data = {
         'nome': nome,
         'campos': campos,
@@ -73,6 +76,7 @@ def categoria_add_action():
 @session_expired
 def categoria_edit(categoria_id):
     categoria = categoria_collections.find_one({'_id': ObjectId(categoria_id)})
+    categoria['campos'] = [campo.capitalize().replace("_", " ") for campo in categoria['campos']]
 
     sessao = {
         'id': session.get('funcionario_id', ''),
@@ -104,7 +108,7 @@ def categoria_edit_action(categoria_id):
         flash(f'Campo{plural} não preenchido{plural}: {", ".join(vazios)}!', 'danger')
         return redirect(url_for('.categoria_edit', categoria_id=categoria_id))
 
-    campos = [campo.capitalize().strip().replace(' ', '_') for campo in campos]
+    campos = [campo.lower().strip().replace(' ', '_') for campo in campos]
     update_data = {
         'nome': nome,
         'campos': campos,
@@ -144,7 +148,7 @@ def get_campos(categoria_id):
     )
 
     return jsonify({
-        'campos': categoria.get('campos')
+        'campos': [campo.replace('_', ' ').capitalize() for campo in categoria.get('campos')]
     })
 
 
