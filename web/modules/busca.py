@@ -61,8 +61,6 @@ def buscar_objetos(data_encontrado, categoria_id, identificacao, local_encontrad
     if query:
         pipeline.append({"$match": query})
 
-    print(query)
-
     project_fields = {
         "_id": 0,
         "data_encontrado": 1,
@@ -100,7 +98,6 @@ def buscar_objetos(data_encontrado, categoria_id, identificacao, local_encontrad
     ])
 
     objetos = list(objetos_collections.aggregate(pipeline))
-    print(objetos)
 
     return jsonify(objetos)
 

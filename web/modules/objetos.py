@@ -254,7 +254,6 @@ def objeto_edit_action(objeto_id):
         return redirect(url_for('.objeto_edit', objeto_id=objeto_id))
 
     campos = {campo: request.form.get(f'campos[{campo}]') for campo in categoria.get('campos', [])}
-    print(campos)
 
     update_data = {
         'descricao': descricao,
