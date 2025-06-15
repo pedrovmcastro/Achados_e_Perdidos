@@ -1,14 +1,13 @@
 import os
 from werkzeug.utils import secure_filename
-from flask import current_app
 
-PASTA = os.path.join(os.getcwd(), 'static', 'uploads')
-EXTENSOES = {'png', 'jpg', 'jpeg', 'gif'}
-TAMANHO_MAXIMO = 16 * 1024 * 1024 # 16 Megabytes
+PASTA = os.path.join(os.getcwd(), "static", "uploads")
+EXTENSOES = {"png", "jpg", "jpeg", "gif"}
+TAMANHO_MAXIMO = 16 * 1024 * 1024  # 16 Megabytes
 
 
 def permitidos(arquivo):
-    return '.' in arquivo and arquivo.rsplit('.', 1)[1].lower() in EXTENSOES
+    return "." in arquivo and arquivo.rsplit(".", 1)[1].lower() in EXTENSOES
 
 
 def salvar_arquivo(arquivo):
@@ -16,5 +15,5 @@ def salvar_arquivo(arquivo):
         nome_do_arquivo = secure_filename(arquivo.filename)
         pasta_upload = os.path.join(PASTA, nome_do_arquivo)
         arquivo.save(pasta_upload)
-        return os.path.join('uploads', nome_do_arquivo)
+        return os.path.join("uploads", nome_do_arquivo)
     return None

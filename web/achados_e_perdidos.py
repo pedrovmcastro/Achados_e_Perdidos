@@ -11,7 +11,7 @@ from modules.logon import logon
 from modules.busca import busca
 
 app = Flask(__name__)
-app.secret_key = '-\x06\xb3\xbd\x15/\xc3\xef~\xd8]\xb3\xef\xd8\xa3\xe5\xa5Sn\xf3SNx\xa9'
+app.secret_key = "-\x06\xb3\xbd\x15/\xc3\xef~\xd8]\xb3\xef\xd8\xa3\xe5\xa5Sn\xf3SNx\xa9"
 
 app.register_blueprint(categoria)
 app.register_blueprint(objeto)
@@ -21,7 +21,7 @@ app.register_blueprint(busca)
 
 
 # Filtros #
-@app.template_filter('format_datetime')
+@app.template_filter("format_datetime")
 def jinja_format_datetime(value):
     if value is None:
         return ""
@@ -42,7 +42,7 @@ def jinja_format_datetime(value):
 
 # ----- #
 # Index #
-@app.route('/')
+@app.route("/")
 def index():
     sessao = {
         "id": session.get("funcionario_id", ""),
@@ -51,16 +51,18 @@ def index():
         "logado": session.get("logado", ""),
     }
 
-    hoje = datetime.now().strftime(r'%Y-%m-%d')
+    hoje = datetime.now().strftime(r"%Y-%m-%d")
 
-    return render_template('index.html',
-                           objetos_perdidos=get_objetos_perdidos(),
-                           categorias=get_categorias(),
-                           hoje=hoje,
-                           sessao=sessao,)
+    return render_template(
+        "index.html",
+        objetos_perdidos=get_objetos_perdidos(),
+        categorias=get_categorias(),
+        hoje=hoje,
+        sessao=sessao,
+    )
 
 
-@app.route('/admin/')
+@app.route("/admin/")
 @login_required
 @session_expired
 def admin():
@@ -70,16 +72,16 @@ def admin():
         "administrador": session.get("administrador", ""),
     }
 
-    return render_template('admin.html', sessao=sessao)
+    return render_template("admin.html", sessao=sessao)
 
 
-@app.route('/login/')
+@app.route("/login/")
 def login():
-    return render_template('login.html')
+    return render_template("login.html")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+    app.config["TEMPLATES_AUTO_RELOAD"] = True
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     app.run(debug=True)

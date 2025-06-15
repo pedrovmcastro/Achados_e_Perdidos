@@ -58,7 +58,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 });
 
                 document.querySelector("#campos").appendChild(pill);
-                tag.value = "";
+                e.target.value = ""
             }
         }
     });
@@ -127,7 +127,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 <h3 class="mb-4">Listagem de Categorias</h3>
                 {% if categorias %}
-                <table class="table table-striped">
+                <table class="table table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
                             <th>Nome</th>

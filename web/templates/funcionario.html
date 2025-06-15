@@ -135,8 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <hr />
 
                 <h3 class="mb-4">Listagem de Funcionários</h3>
-                {% if funcionarios %}
-                <table class="table table-striped">
+                {% if ligados %}
+                <table class="table table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
                             <th>Nome</th>
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {% for funcionario in funcionarios %}
+                        {% for funcionario in ligados %}
                         <tr>
                             <td>{{ funcionario.nome }}</td>
                             <td>{{ funcionario.matricula }}</td>
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <h3 class="mb-4">Listagem de Funcionários Desligados</h3>
                 {% if desligados %}
-                <table class="table table-striped">
+                <table class="table table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
                             <th>Nome</th>

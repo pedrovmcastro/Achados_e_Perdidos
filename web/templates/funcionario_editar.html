@@ -84,22 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <div class="mb-3">
                             <label for="nome" class="form-label">Nome<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nome" name="nome" value="{{ funcionario.nome }}" placeholder="Nome completo" />
+                            <input type="text" class="form-control" id="nome" name="nome" value="{{ funcionario.nome }}" placeholder="Nome completo" required />
                         </div>
 
                         <div class="mb-3">
                             <label for="matricula" class="form-label">Matrícula<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="matricula" name="matricula" value="{{ funcionario.matricula }}" placeholder="Número de matrícula" />
+                            <input type="text" class="form-control" id="matricula" name="matricula" value="{{ funcionario.matricula }}" placeholder="Número de matrícula" required />
                         </div>
 
                         <div class="mb-3">
-                            <label for="senha" class="form-label">Senha<span class="text-danger">*</span></label>
+                            <label for="senha" class="form-label">Senha</label>
                             <input type="password" class="form-control" id="senha" name="senha" placeholder="Digite uma nova senha" />
                         </div>
 
                         <div class="mb-3">
-                            <label for="senha" class="form-label">Confime a senha<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="senhaConfirmar" name="senhaConfirmar" placeholder="Confirme a senha" required />
+                            <label for="senha" class="form-label">Confime a senha</label>
+                            <input type="password" class="form-control" id="senhaConfirmar" name="senhaConfirmar" placeholder="Confirme a senha" />
                         </div>
 
                         <p id="erroSenha" class="d-none text-danger">Senha e confirmação de senha não coicidem!</p>
@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         <div class="mb-4">
                             <label for="cep" class="form-label">CEP</label>
-                            <input type="text" class="form-control" id="cep" name="cep" placeholder="00000-000" onkeyup="this.value = maskCEP(this.value)" maxlength="9" />
+                            <input type="text" class="form-control" id="cep" name="cep" value="{{ funcionario.endereco.cep }}" placeholder="00000-000" onkeyup="this.value = maskCEP(this.value)"  maxlength="9" />
                         </div>
 
                         <div class="d-flex gap-2">
